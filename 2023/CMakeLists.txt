@@ -40,4 +40,11 @@ target_link_libraries(adventofcode PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2
 target_compile_options(adventofcode PRIVATE -ffast-math -O3 -Wall -pipe)
 set_property(TARGET adventofcode PROPERTY CXX_STANDARD 20)
 
-file(COPY input DESTINATION ${CMAKE_BINARY_DIR})
+add_custom_target(
+    copy-files ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/input
+        ${CMAKE_CURRENT_BINARY_DIR}/input
+)
+
+add_dependencies(adventofcode copy-files)

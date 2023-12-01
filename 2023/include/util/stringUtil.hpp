@@ -37,7 +37,7 @@ std::vector<std::string> split(std::string str, std::string delim) {
         str.erase(0, pos + delim.length());
     }
 
-    out.push_back(str);
+    if(str.size() > 0) out.push_back(str);
 
     return out;
 }

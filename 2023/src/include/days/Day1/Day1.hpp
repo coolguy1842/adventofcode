@@ -4,86 +4,73 @@
 #include <spdlog/spdlog.h>
 #include <day.hpp>
 
+#include <robin_hood.hpp>
+
 #include <vector>
 #include <regex>
 
 class Day1 : public AOC::Day {
-public:
+private:
     int partASolution;
     int partBSolution;
+    
+    const robin_hood::unordered_flat_map<std::string, int> strToNumber = {
+        { "one",   1 },
+        { "two",   2 },
+        { "three", 3 },
+        { "four",  4 },
+        { "five",  5 },
+        { "six",   6 },
+        { "seven", 7 },
+        { "eight", 8 },
+        { "nine",  9 },
+    };
 
+public:
     void partA() {
-        std::vector<int> numbers = {};
+        std::regex re("(\\d)");
+        partASolution = 0;
 
-        for(std::string i : split(this->input, "\n")) {
+        for(std::string line : this->input) {
             std::vector<int> digits = {};
+            
+            std::smatch res;
+            std::string str = line;
 
-            for(char c : i) {
-                if(isdigit(c)) {
-                    digits.push_back(c - '0');
-                }
+            while(std::regex_search(str, res, re)) {
+                digits.push_back(res.str(0)[0] - '0');
+                str = res.suffix().str();
             }
 
-            // printf("%d\n", (digits[0] * 10) + digits[digits.size() - 1]);
-            // numbers.push_back((digits[0] * 10) + digits[digits.size() - 1]);
-        }
-
-        partASolution = 0;
-        for(int num : numbers) {
-            partASolution += num;
+            partASolution += (digits[0] * 10) + digits[digits.size() - 1];
         }
     }
     
     void partB() {
-        std::vector<int> numbers = {};
-
-        std::regex first("^.*?(([0-9])|(one|two|three|four|five|six|seven|eight|nine)){1}"); 
-        std::regex last(".*(([0-9])|(one|two|three|four|five|six|seven|eight|nine))");
-
-        for(std::string i : split(this->input, "\n")) {
+        partBSolution = 0;
+        std::regex re("(\\d|one|two|three|four|five|six|seven|eight|nine)");
+    
+        for(std::string line : this->input) {
             std::vector<int> digits = {};
             
-            std::smatch m; 
-            std::regex_search(i, m, first);
-            std::smatch m2; 
-            std::regex_search(i, m2, last, std::regex_constants::match_any);
+            std::smatch res;
+            std::string str = line;
+            while(std::regex_search(str, res, re)) {
+                std::string num = res.str(0);
 
-            std::string digitStr = m[1];
-            digitStr = replace(digitStr, "one", "1");
-            digitStr = replace(digitStr, "two", "2");
-            digitStr = replace(digitStr, "three", "3");
-            digitStr = replace(digitStr, "four", "4");
-            digitStr = replace(digitStr, "five", "5");
-            digitStr = replace(digitStr, "six", "6");
-            digitStr = replace(digitStr, "seven", "7");
-            digitStr = replace(digitStr, "eight", "8");
-            digitStr = replace(digitStr, "nine", "9");
-            
-            std::string digitStr2 = m2[1];
-            digitStr2 = replace(digitStr2, "one", "1");
-            digitStr2 = replace(digitStr2, "two", "2");
-            digitStr2 = replace(digitStr2, "three", "3");
-            digitStr2 = replace(digitStr2, "four", "4");
-            digitStr2 = replace(digitStr2, "five", "5");
-            digitStr2 = replace(digitStr2, "six", "6");
-            digitStr2 = replace(digitStr2, "seven", "7");
-            digitStr2 = replace(digitStr2, "eight", "8");
-            digitStr2 = replace(digitStr2, "nine", "9");
+                if(isdigit(num[0])) digits.push_back(num[0] - '0');
+                else digits.push_back(strToNumber.at(num));
+                
+                str = std::string(str.c_str() + 1);
+            }
 
-            numbers.push_back(((digitStr[0] - '0') * 10) + (digitStr2[0] - '0'));
-
-            printf("%s, %s\n", digitStr.c_str(), digitStr2.c_str());
-        }
-
-        partBSolution = 0;
-        for(int num : numbers) {
-            partBSolution += num;
+            partBSolution += (digits[0] * 10) + digits[digits.size() - 1];
         }
     }
 
-    void printSolution() {
-        spdlog::info("partA: {}", partASolution);
-        spdlog::info("partB: {}", partBSolution);
+    void printSolution(bool partA, bool partB) {
+        if(partA) spdlog::info("partA: {}", partASolution);
+        if(partB) spdlog::info("partB: {}", partBSolution);
     }
 
     Day1() : Day("input/day1.txt") {}

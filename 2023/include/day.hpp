@@ -2,9 +2,12 @@
 #define __DAY_HPP__
 
 #include <string>
+#include <vector>
 #include <fstream>
 #include <sstream>
+
 #include <stdio.h>
+#include <util/stringUtil.hpp>
 
 #include <timer.hpp>
 
@@ -12,7 +15,7 @@ namespace AOC {
 
 class Day {
 protected:
-    std::string input;
+    std::vector<std::string> input;
 
     AOC::Timer partATimer = Timer("partA");
     AOC::Timer partBTimer = Timer("partB");
@@ -23,7 +26,7 @@ private:
         std::stringstream sstream;
 
         sstream << file.rdbuf();
-        input = sstream.str();
+        input = split(sstream.str(), "\n");
     }
 
 public:
@@ -31,14 +34,12 @@ public:
         this->readInput(inputPath);
     }
 
-    virtual ~Day() {
-        
-    }
+    virtual ~Day() {}
 
     virtual void partA() {};
     virtual void partB() {};
 
-    virtual void printSolution() {};
+    virtual void printSolution(bool partA, bool partB) {};
 
     void runPartA() {
         partATimer.start();
