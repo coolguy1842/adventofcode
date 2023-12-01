@@ -31,6 +31,10 @@ public:
         this->readInput(inputPath);
     }
 
+    virtual ~Day() {
+        
+    }
+
     virtual void partA() {};
     virtual void partB() {};
 

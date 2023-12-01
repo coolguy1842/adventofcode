@@ -1,46 +1,25 @@
 #include <stdio.h>
 #include <days.hpp>
 
-#include <args/catch.hpp>
-#include <args/args.hxx>
+#include <argparse/argparse.hpp>
 
 #include <spdlog/spdlog.h>
 
 int main(int argc, char** argv) {
-    args::ArgumentParser parser("Advent of Code runner.", "Usage: ./adventofcode day");
-    args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
-    args::CompletionFlag completion(parser, {"complete"});
-
-    args::CounterFlag showTimersOption(parser, "timers", "Show timer values", {'t', "timers"});
-    args::Positional<int> dayOption(parser, "day", "The day to run (1 to 25)");
+    argparse::ArgumentParser program("Advent of Code");
+    program.add_argument("day").help("the day to run").scan<'i', int>().choices(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25);
+    program.add_argument("-t", "--timers").help("if performance timers should be displayed").flag();
 
     try {
-        parser.ParseCLI(argc, argv);
+        program.parse_args(argc, argv);
     }
-    catch (const args::Completion& e) {
-        std::cout << e.what();
-        return 0;
-    }
-    catch (const args::Help&) {
-        std::cout << parser;
-        return 0;
-    }
-    catch (const args::ParseError& e) {
-        std::cerr << e.what() << std::endl;
-        std::cerr << parser;
+    catch (const std::exception& err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << program;
         return 1;
     }
 
-    if(!dayOption) {
-        printf("%s\n", parser.Help().c_str());
-        return -1;
-    } 
-
-    int dayNum = dayOption.Get();
-    if(dayNum < 1 || dayNum > 25) {
-        spdlog::error("Day number is out of range.");
-        return -1;
-    } 
+    int dayNum = program.get<int>("day");
 
     AOC::Day* day;
     switch (dayNum) {
@@ -53,7 +32,7 @@ int main(int argc, char** argv) {
     
     day->printSolution();
 
-    if(showTimersOption.Get()) {    
+    if(program.get<bool>("--timers")) {    
         day->getTimerA().print();
         day->getTimerB().print();
     }
