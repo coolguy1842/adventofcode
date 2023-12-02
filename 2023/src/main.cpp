@@ -26,27 +26,26 @@ int main(int argc, char** argv) {
     AOC::Day* day;
     switch (dayNum) {
     case 1: day = (AOC::Day*)new Day1(); break;
+    case 2: day = (AOC::Day*)new Day2(); break;
     default: spdlog::error("Day not found."); return -1;
     }
 
 
     bool partA = program.get<bool>("-a");
     bool partB = program.get<bool>("-b");
-
     bool both = (!partA && !partB) || (partA && partB); 
 
-    if(both) {
-        day->runPartA();
-        day->runPartB();
-    }
-    else if(partA) day->runPartA();
-    else day->runPartB();
+    partA = partA || both;
+    partB = partB || both;
+
+    if(partA) day->runPartA();
+    if(partB) day->runPartB();
     
-    day->printSolution(partA || both, partB || both);
+    day->printSolution(partA, partB);
 
     if(program.get<bool>("--timers")) {
-        day->getTimerA().print();
-        day->getTimerB().print();
+        if(partA) day->getTimerA().print();
+        if(partB) day->getTimerB().print();
     }
 
     delete day;

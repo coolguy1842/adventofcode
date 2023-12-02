@@ -53,15 +53,15 @@ public:
         for(std::string line : this->input) {
             std::vector<int> digits = {};
             
-            std::smatch res;
-            std::string str = line;
+            std::cmatch res;
+            const char* str = line.c_str();
             while(std::regex_search(str, res, re)) {
                 std::string num = res.str(0);
 
                 if(isdigit(num[0])) digits.push_back(num[0] - '0');
                 else digits.push_back(strToNumber.at(num));
                 
-                str = std::string(str.c_str() + 1);
+                str++;
             }
 
             partBSolution += (digits[0] * 10) + digits[digits.size() - 1];

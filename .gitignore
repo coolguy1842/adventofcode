@@ -1,6 +1,5 @@
 .vscode
 **/build
-build
 
 **/input/*.txt
 **/build.bat
