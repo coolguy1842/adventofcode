@@ -34,7 +34,7 @@ std::vector<std::string> split(std::string str, std::string delim) {
     while((pos = str.find(delim)) != std::string::npos) {
         out.push_back(str.substr(0, pos));
         
-        str.erase(0, pos + delim.length());
+        str = str.substr(pos + delim.length());
     }
 
     if(str.size() > 0) out.push_back(str);

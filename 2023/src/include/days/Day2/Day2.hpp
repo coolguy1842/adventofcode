@@ -5,82 +5,104 @@
 #include <day.hpp>
 
 #include <vector>
-#include <regex>
+
+enum Colour {
+    RED = 'r',
+    GREEN = 'g',
+    BLUE = 'b'
+};
+
+struct Cube {
+    Colour colour;
+    int count;
+};
+
+struct Set {
+    std::vector<Cube> cubes;
+};
+
+struct Game {
+    int id;
+    std::vector<Set> sets;
+};
 
 class Day2 : public AOC::Day {
 private:
     int partASolution;
     int partBSolution;
 
+    std::vector<Game> games;
+
 public:
+    void getGames() {
+        for(std::string& line : input) {
+            std::vector<std::string> splitStr = split(line, ": ");
+            
+            Game game;
+            game.id = atoi(splitStr[0].c_str() + 5);
+
+            for(std::string& setStr : split(splitStr[1], "; ")) {
+                Set set;
+
+                for(std::string& cubeStr : split(setStr, ", ")) {
+                    std::vector<std::string> info = split(cubeStr, " ");
+                    
+                    Cube cube = { (Colour)info[1][0], atoi(info[0].c_str()) };
+                    set.cubes.push_back(cube);
+                }
+
+                game.sets.push_back(set);
+            }
+
+            games.push_back(game);
+        }
+    }
+
+
     void partA() {
+        if(games.size() <= 0) this->getGames();
+        
         const int maxRed = 12;
         const int maxGreen = 13;
         const int maxBlue = 14;
 
         partASolution = 0;
 
-        for(std::string line : input) {
-            std::vector<std::string> splitStr = split(line, ": ");
-            int gameID = atoi(split(splitStr[0], " ")[1].c_str());
-
-            std::vector<std::string> sets = split(splitStr[1], "; ");
-
-            int maxRedUsed = 0;
-            int maxBlueUsed = 0;
-            int maxGreenUsed = 0;
-
-            for(std::string set : sets) {
-                std::vector<std::string> cubes = split(set, ", ");
-
-                for(std::string cube : cubes) {
-                    std::vector<std::string> info = split(cube, " ");
-                    std::string colour = info[1];
-                    int count = atoi(info[0].c_str());
-
-                    if(colour == "red") maxRedUsed = std::max(maxRedUsed, count);
-                    else if(colour == "blue") maxBlueUsed = std::max(maxBlueUsed, count);
-                    else if(colour == "green") maxGreenUsed = std::max(maxGreenUsed, count);
+        for(Game& game : games) {
+            for(Set& set : game.sets) {
+                for(Cube& cube : set.cubes) {
+                    switch(cube.colour) {
+                    case Colour::RED: if(cube.count > maxRed) goto skip; break;
+                    case Colour::GREEN: if(cube.count > maxGreen) goto skip; break;
+                    case Colour::BLUE: if(cube.count > maxBlue) goto skip; break;
+                    default: break;
+                    }
                 }
             }
 
-            if(maxRedUsed > maxRed || maxBlueUsed > maxBlue || maxGreenUsed > maxGreen) {
-                printf("red: %d, green: %d, blue: %d\n", maxRedUsed, maxBlueUsed, maxGreenUsed);
-
-                continue;
-            }
-
-            partASolution += gameID;
+            partASolution += game.id;
+            skip:
         }
     }
     
     void partB() {
+        if(games.size() <= 0) this->getGames();
         partBSolution = 0;
 
-        for(std::string line : input) {
-            std::vector<std::string> splitStr = split(line, ": ");
-            int gameID = atoi(split(splitStr[0], " ")[1].c_str());
-
-            std::vector<std::string> sets = split(splitStr[1], "; ");
-
-            int maxRedUsed = 0;
-            int maxBlueUsed = 0;
-            int maxGreenUsed = 0;
-
-            for(std::string set : sets) {
-                std::vector<std::string> cubes = split(set, ", ");
-
-                for(std::string cube : cubes) {
-                    std::vector<std::string> info = split(cube, " ");
-                    std::string colour = info[1];
-                    int count = atoi(info[0].c_str());
-
-                    if(colour == "red") maxRedUsed = std::max(maxRedUsed, count);
-                    else if(colour == "blue") maxBlueUsed = std::max(maxBlueUsed, count);
-                    else if(colour == "green") maxGreenUsed = std::max(maxGreenUsed, count);
-                }
+        for(Game& game : games) {
+            int maxRedUsed = 0, maxBlueUsed = 0, maxGreenUsed = 0;
+            
+            for(Set& set : game.sets) {
+                for(Cube& cube : set.cubes) {
+                    switch(cube.colour) {
+                    case Colour::RED: maxRedUsed = std::max(maxRedUsed, cube.count); break;
+                    case Colour::GREEN: maxBlueUsed = std::max(maxBlueUsed, cube.count); break;
+                    case Colour::BLUE: maxGreenUsed = std::max(maxGreenUsed, cube.count); break;
+                    default: break;
+                    }
+                }    
             }
-
+            
             partBSolution += maxRedUsed * maxGreenUsed * maxBlueUsed;
         }
     }

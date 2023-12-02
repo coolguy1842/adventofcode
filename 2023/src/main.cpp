@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
     switch (dayNum) {
     case 1: day = (AOC::Day*)new Day1(); break;
     case 2: day = (AOC::Day*)new Day2(); break;
+    case 3: day = (AOC::Day*)new Day3(); break;
     default: spdlog::error("Day not found."); return -1;
     }
 
