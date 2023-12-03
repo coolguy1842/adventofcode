@@ -1,27 +1,24 @@
 #include <stdio.h>
 #include <days.hpp>
 
-#include <argparse/argparse.hpp>
+#include <CLI/CLI.hpp>
 
 #include <spdlog/spdlog.h>
 
 int main(int argc, char** argv) {
-    argparse::ArgumentParser program("Advent of Code");
-    program.add_argument("day").help("the day to run").scan<'i', int>().choices(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25);
-    program.add_argument("-t", "--timers").help("if performance timers should be displayed").flag();
-    program.add_argument("-a", "--parta").help("if part a should run(if b is also not specified both will run)").flag();
-    program.add_argument("-b", "--partb").help("if part b should run(if a is also not specified both will run)").flag();
+    CLI::App app;
+    
+    bool showTimers, partA, partB;
+    
+    app.add_flag("-t,--timers", showTimers, "Should the timers be visible?");
 
-    try {
-        program.parse_args(argc, argv);
-    }
-    catch (const std::exception& err) {
-        std::cerr << err.what() << std::endl;
-        std::cerr << program;
-        return 1;
-    }
+    app.add_flag("-a,--parta", partA, "Should part a be run?");
+    app.add_flag("-b,--partb", partB, "Should part b be run?");
 
-    int dayNum = program.get<int>("day");
+    int dayNum;
+    app.add_option("day", dayNum)->required();
+
+    CLI11_PARSE(app, argc, argv);
 
     AOC::Day* day;
     switch (dayNum) {
@@ -32,8 +29,6 @@ int main(int argc, char** argv) {
     }
 
 
-    bool partA = program.get<bool>("-a");
-    bool partB = program.get<bool>("-b");
     bool both = (!partA && !partB) || (partA && partB); 
 
     partA = partA || both;
@@ -44,7 +39,7 @@ int main(int argc, char** argv) {
     
     day->printSolution(partA, partB);
 
-    if(program.get<bool>("--timers")) {
+    if(showTimers) {
         if(partA) day->getTimerA().print();
         if(partB) day->getTimerB().print();
     }

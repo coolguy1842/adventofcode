@@ -3,6 +3,9 @@ project(adventofcode VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/CMake")
 
+set(CLI11_PRECOMPILED true)
+add_subdirectory(CLI11)
+
 set(HEADER_FILES
     src/include/days.hpp
     src/include/days/Day1/Day1.hpp
@@ -25,19 +28,11 @@ add_executable(adventofcode ${SOURCE_FILES})
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-
-include(FetchContent)
-FetchContent_Declare(
-    argparse
-    GIT_REPOSITORY https://github.com/p-ranav/argparse.git
-)
-
-FetchContent_MakeAvailable(argparse)
-
+include(CPack)
 
 find_package(spdlog REQUIRED)
 
-target_link_libraries(adventofcode PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32> argparse)
+target_link_libraries(adventofcode PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32> CLI11::CLI11)
 target_compile_options(adventofcode PRIVATE -ffast-math -O3 -Wall -pipe -march=native)
 set_property(TARGET adventofcode PROPERTY CXX_STANDARD 20)
 
