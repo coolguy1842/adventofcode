@@ -66,20 +66,35 @@ public:
         }
     }
 
-    std::vector<Card> partBFunc(std::vector<Card> list) {
-        std::vector<Card> out;
 
-        for(const Card& card : list) {
+    robin_hood::unordered_flat_map<int, std::vector<int>> loadPartBCache() {
+        robin_hood::unordered_flat_map<int, std::vector<int>> cache;
+
+        for(const Card& card : cards) {
+            std::vector<int> numbers;
+
             int value = 0;
-
-            for(int number : card.numbers) {
+            for(const int& number : card.numbers) {
                 if(!card.winningNumbers.contains(number)) continue;
-                
                 value++;
             }
             
             for(int i = 0; i < value; i++) {
-                out.push_back(cards[card.number + i]);
+                numbers.push_back(card.number + i);
+            }
+
+            cache[card.number - 1] = numbers;
+        }
+
+        return cache;
+    }
+
+    std::vector<int> partBFunc(const std::vector<int>& list, const robin_hood::unordered_flat_map<int, std::vector<int>>& cachedResults) {
+        std::vector<int> out;
+
+        for(const int& number : list) {
+            for(const int& n : cachedResults.at(number)) {
+                out.push_back(n);
             }
         }
 
@@ -89,9 +104,15 @@ public:
     void partB() {
         if(cards.size() <= 0) loadCards();
         partBSolution = cards.size();
-        std::vector<Card> temp = cards;
+
+        robin_hood::unordered_flat_map<int, std::vector<int>> cache = loadPartBCache();
+        std::vector<int> temp;
         
-        while((temp = partBFunc(temp)).size() > 0) {
+        for(const Card& card : cards) {
+            temp.push_back(card.number - 1);
+        }
+        
+        while((temp = partBFunc(temp, cache)).size() > 0) {
             partBSolution += temp.size();
         }
     }
