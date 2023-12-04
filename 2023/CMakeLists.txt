@@ -9,6 +9,9 @@ add_subdirectory(CLI11)
 set(HEADER_FILES
     src/include/days.hpp
     src/include/days/Day1/Day1.hpp
+    src/include/days/Day2/Day2.hpp
+    src/include/days/Day3/Day3.hpp
+    src/include/days/Day4/Day4.hpp
 
     include/util/linkedList.hpp
     include/util/stringUtil.hpp
@@ -30,9 +33,7 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
-find_package(spdlog REQUIRED)
-
-target_link_libraries(adventofcode PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32> CLI11::CLI11)
+target_link_libraries(adventofcode PRIVATE $<$<BOOL:${MINGW}>:ws2_32> CLI11::CLI11)
 target_compile_options(adventofcode PRIVATE -ffast-math -O3 -Wall -pipe -march=native)
 set_property(TARGET adventofcode PROPERTY CXX_STANDARD 20)
 

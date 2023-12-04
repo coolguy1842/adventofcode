@@ -1,7 +1,7 @@
 #ifndef __DAY2_HPP__
 #define __DAY2_HPP__
 
-#include <spdlog/spdlog.h>
+#include <stdio.h>
 #include <day.hpp>
 
 #include <vector>
@@ -109,8 +109,8 @@ public:
     }
 
     void printSolution(bool partA, bool partB) {
-        if(partA) spdlog::info("partA: {}", partASolution);
-        if(partB) spdlog::info("partB: {}", partBSolution);
+        if(partA) printf("partA: %d\n", partASolution);
+        if(partB) printf("partB: %d\n", partBSolution);
     }
 
     Day2() : Day("input/day2.txt") {}

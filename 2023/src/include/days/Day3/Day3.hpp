@@ -82,6 +82,7 @@ public:
         return out;
     }
 
+
     void partA() {
         if(map.size() <= 0) loadMap();
         partASolution = 0;

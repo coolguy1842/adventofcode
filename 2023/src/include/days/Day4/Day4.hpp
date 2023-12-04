@@ -1,13 +1,8 @@
 #ifndef __DAY4_HPP__
 #define __DAY4_HPP__
 
-#include <spdlog/spdlog.h>
 #include <day.hpp>
-
-#include <robin_hood.hpp>
-
-#include <vector>
-#include <regex>
+#include <stdio.h>
 
 class Day4 : public AOC::Day {
 private:
@@ -24,8 +19,8 @@ public:
     }
 
     void printSolution(bool partA, bool partB) {
-        if(partA) spdlog::info("partA: {}", partASolution);
-        if(partB) spdlog::info("partB: {}", partBSolution);
+        if(partA) printf("partA: %d\n", partASolution);
+        if(partB) printf("partB: %d\n", partBSolution);
     }
 
     Day4() : Day("input/day4.txt") {}

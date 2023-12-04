@@ -3,8 +3,6 @@
 
 #include <CLI/CLI.hpp>
 
-#include <spdlog/spdlog.h>
-
 int main(int argc, char** argv) {
     CLI::App app;
     
@@ -26,7 +24,7 @@ int main(int argc, char** argv) {
     case 2: day = (AOC::Day*)new Day2(); break;
     case 3: day = (AOC::Day*)new Day3(); break;
     case 4: day = (AOC::Day*)new Day4(); break;
-    default: spdlog::error("Day not found."); return -1;
+    default: fprintf(stderr, "Day not found.\n"); return -1;
     }
 
 
