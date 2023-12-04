@@ -14,17 +14,25 @@ enum PositionType {
     NUMBER
 };
 
-struct Position {
-    PositionType type;
-    char c;
-
+struct Coordinates {
     int x;
     int y;
 };
 
+struct Position {
+    PositionType type;
+    char c;
+
+    Coordinates coords;
+};
+
+bool operator==(Coordinates const& a, Coordinates const& b) {
+    return a.x == b.x && a.y == b.y; 
+}
+
 struct pair_hash {
-    inline std::size_t operator()(const robin_hood::pair<int, int> & v) const {
-        return ((size_t)v.first << 32) + v.second;
+    inline std::size_t operator()(const Coordinates& c) const {
+        return ((size_t)c.x << 32) + c.y;
     }
 };
 
@@ -53,30 +61,27 @@ public:
             for(int x = 0; x < mapWidth; x++) {
                 char c = input[y][x];
 
-                if(isdigit(c)) map[y][x] = Position { PositionType::NUMBER, c, x, y };
-                else if(c == '.') map[y][x] = Position { PositionType::EMPTY, c, x, y };
-                else map[y][x] = Position { PositionType::SYMBOL, c, x, y };
+                if(isdigit(c)) map[y][x] = { PositionType::NUMBER, c, x, y };
+                else if(c == '.') map[y][x] = { PositionType::EMPTY, c, x, y };
+                else map[y][x] = { PositionType::SYMBOL, c, x, y };
             }
         }
     }
 
-    int getNumber(robin_hood::unordered_flat_set<robin_hood::pair<int, int>, pair_hash>& found, int x, int y) {
-        if(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight || found.contains(robin_hood::pair<int, int>{x, y}) || map[y][x].type != PositionType::NUMBER) return 0;
-        int out = 0, minX = 0;
+    int getNumber(robin_hood::unordered_flat_set<Coordinates, pair_hash>& found, int x, int y) {
+        if(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight || found.contains({x, y}) || map[y][x].type != PositionType::NUMBER) return 0;
+        int out = 0, minX = x;
 
-        for(minX = x; minX >= 0; minX--) {
-            if(map[y][minX].type != PositionType::NUMBER) break;
-        }
+        while(map[y][--minX].type == PositionType::NUMBER);
 
         for(int i = minX + 1; i < mapWidth; i++) {
             Position pos = map[y][i];
-
             if(pos.type != PositionType::NUMBER) break;
         
             out *= 10;
             out += pos.c - '0';
 
-            found.insert(robin_hood::pair<int, int>{pos.x, pos.y});
+            found.insert(pos.coords);
         }
 
         return out;
@@ -87,7 +92,7 @@ public:
         if(map.size() <= 0) loadMap();
         partASolution = 0;
         
-        robin_hood::unordered_flat_set<robin_hood::pair<int, int>, pair_hash> found;
+        robin_hood::unordered_flat_set<Coordinates, pair_hash> found;
 
         for(int y = 0; y <  mapHeight; y++) {
             for(int x = 0; x < mapWidth; x++) {
@@ -104,7 +109,7 @@ public:
         if(map.size() <= 0) loadMap();
         partBSolution = 0;
         
-        robin_hood::unordered_flat_set<robin_hood::pair<int, int>, pair_hash> found;
+        robin_hood::unordered_flat_set<Coordinates, pair_hash> found;
 
         for(long long y = 0; y < mapHeight; y++) {
             for(long long x = 0; x < mapWidth; x++) {
