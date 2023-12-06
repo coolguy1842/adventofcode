@@ -16,6 +16,7 @@ namespace AOC {
 class Day {
 protected:
     std::vector<std::string> input;
+    std::string rawInput;
 
     AOC::Timer partATimer = Timer("partA");
     AOC::Timer partBTimer = Timer("partB");
@@ -26,7 +27,8 @@ private:
         std::stringstream sstream;
 
         sstream << file.rdbuf();
-        input = split(sstream.str(), "\n");
+        rawInput = sstream.str();
+        input = split(rawInput, "\n");
     }
 
 public:
