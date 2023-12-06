@@ -16,6 +16,7 @@ private:
     
 public:
     std::vector<Race> races;
+    Race partBRace;
 
     void loadTimes() {
         const char* timePos = this->input[0].c_str() + strlen("Time: ");
@@ -34,37 +35,39 @@ public:
             distancePos += nextOffset;
         }
         
+
+        std::string time = replace(this->input[0], " ", "");
+        std::string distance = replace(this->input[1], " ", "");
+        sscanf(time.c_str(), "Time:%llu", &partBRace.time);
+        sscanf(distance.c_str(), "Distance:%llu", &partBRace.distance);
     }
 
     bool tryTime(size_t time, size_t limit, size_t best) {
-        size_t travelled = 0;
-        for(size_t i = time; i < limit; i++) {
-            travelled += time;
+        return time * (limit - time) > best;
+    }
+
+    size_t waysToWin(const Race& race) {
+        size_t out = 0;
+        for(size_t i = 1; i <= race.time; i++) {
+            out += i * (race.time - i) > race.distance;
         }
 
-        return travelled > best;
+        return out;
     }
+
 
     void partA() {
         if(races.size() <= 0) loadTimes();
         partASolution = 1;
 
-        for(Race& race : races) {
-            size_t waysToWin = 0;
-
-            for(size_t i = 1; i <= race.time; i++) {
-                if(tryTime(i, race.time, race.distance)) {
-                    waysToWin++;        
-                }
-            }
-
-            partASolution *= waysToWin;
+        for(const Race& race : races) {
+            partASolution *= waysToWin(race);
         }
     }
     
     void partB() {
         if(races.size() <= 0) loadTimes();
-        partBSolution = 0;
+        partBSolution = waysToWin(partBRace);
     }
 
     void printSolution(bool partA, bool partB) {
