@@ -131,22 +131,20 @@ public:
 
     void partA() {
         if(seeds.size() <= 0) loadSeeds();
-        partASolution = 0;
+        partASolution = __LONG_MAX__;
 
-        robin_hood::unordered_flat_map<size_t, size_t> seedValues;
         for(const size_t& seed : seeds) {
-            seedValues[seed] = seed;
-            size_t* value = &seedValues[seed];
+            size_t value = seed;
         
             for(int curData = CurrentData::SOIL; curData <= CurrentData::LOCATION; curData++) {
                 PropertyRange range;
-                if(inConverter(&range, *value, curData)) {
-                    *value = range.getDest(*value);
+                if(inConverter(&range, value, curData)) {
+                    value = range.getDest(value);
                 }
             }
-        }
 
-        partASolution = (*std::min_element(seedValues.begin(), seedValues.end(), [](const auto& lhs, const auto& rhs){ return lhs.second < rhs.second; })).second;
+            partASolution = std::min(partASolution, value);
+        }
     }
 
 
@@ -154,37 +152,35 @@ public:
         if(seeds.size() <= 0) loadSeeds();
         partBSolution = 0;
 
-
-
         std::vector<std::thread> threads;
         std::mutex threadMutex;
 
-        robin_hood::unordered_flat_set<size_t> threadMinSeedValues = {};
+        size_t threadMinValue = __LONG_MAX__;
         std::for_each(
             std::execution::par,
             seedRanges.begin(),
             seedRanges.end(),
             [&](auto&& pair) {
-                robin_hood::unordered_flat_map<size_t, size_t> seedValues;
                 for(size_t seed = pair.first; seed < pair.first + pair.second; seed++) {
-                    seedValues[seed] = seed;
-                    size_t* value = &seedValues[seed];
+                    size_t value = seed;
                 
                     for(int curData = CurrentData::SOIL; curData <= CurrentData::LOCATION; curData++) {
                         PropertyRange range;
-                        if(inConverter(&range, *value, curData)) {
-                            *value = range.getDest(*value);
+                        if(inConverter(&range, value, curData)) {
+                            value = range.getDest(value);
                         }
                     }
+
+                    threadMutex.lock();
+                    threadMinValue = std::min(threadMinValue, value);
+                    threadMutex.unlock();
                 }
+            }
+        );
 
-                threadMutex.lock();
-                threadMinSeedValues.emplace((*std::min_element(seedValues.begin(), seedValues.end(), [](const auto& lhs, const auto& rhs){ return lhs.second < rhs.second; })).second);
-                threadMutex.unlock();
-            });
-
-        partBSolution = *std::min_element(threadMinSeedValues.begin(), threadMinSeedValues.end());   
+        partBSolution = threadMinValue;
     }
+    
     void printSolution(bool partA, bool partB) {
         if(partA) printf("partA: %llu\n", partASolution);
         if(partB) printf("partB: %llu\n", partBSolution);
