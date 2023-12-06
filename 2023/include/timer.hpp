@@ -20,7 +20,7 @@ private:
 public:
     Timer(std::string name) : name(name) {}
 
-    void start() {    
+    void start() {
         startTime = std::chrono::high_resolution_clock::now();
         if(startTime > stopTime) {
             hasStop = false;

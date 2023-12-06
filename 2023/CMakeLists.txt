@@ -34,7 +34,10 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
-target_link_libraries(adventofcode PRIVATE $<$<BOOL:${MINGW}>:ws2_32> CLI11::CLI11)
+
+find_package(TBB REQUIRED COMPONENTS tbb)
+
+target_link_libraries(adventofcode PRIVATE $<$<BOOL:${MINGW}>:ws2_32> CLI11::CLI11 pthread tbb12)
 target_compile_options(adventofcode PRIVATE -ffast-math -O3 -Wall -pipe -march=native)
 set_property(TARGET adventofcode PROPERTY CXX_STANDARD 20)
 
