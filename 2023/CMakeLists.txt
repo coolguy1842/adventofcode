@@ -12,6 +12,7 @@ set(HEADER_FILES
     src/include/days/Day2/Day2.hpp
     src/include/days/Day3/Day3.hpp
     src/include/days/Day4/Day4.hpp
+    src/include/days/Day5/Day5.hpp
 
     include/util/linkedList.hpp
     include/util/stringUtil.hpp

@@ -6,6 +6,28 @@
 
 #include <robin_hood.hpp>
 
+struct PropertyRange {
+    size_t sourceStart;
+    size_t sourceEnd;
+
+    size_t destStart;
+
+public:
+    bool inRange(size_t value) { return value >= sourceStart && value <= sourceEnd; }
+    size_t getDest(size_t value) { return destStart + (sourceStart - value); } 
+};
+
+bool operator==(const PropertyRange& a, const PropertyRange& b) {
+    return a.start == b.start && a.end == b.end; 
+}
+
+struct range_hash {
+    inline std::size_t operator()(const PropertyRange& p) const {
+        return p.sourceStart * 32 + p.sourceEnd * 16 + p.destStart;
+    }
+};
+
+
 class Day5 : public AOC::Day {
 private:
     size_t partASolution;
@@ -13,21 +35,13 @@ private:
     
     robin_hood::unordered_flat_set<size_t> seeds;
 
-    struct Range {
-        size_t start;
-        size_t end;
-
-        bool inRange(size_t value) { return value >= start && value <= end; } 
-    };
-
-
-    robin_hood::unordered_flat_map<Range, Range> seedToSoilRanges;
-    robin_hood::unordered_flat_map<Range, Range> soilToFertilizer;
-    robin_hood::unordered_flat_map<Range, Range> fertilizerToWater;
-    robin_hood::unordered_flat_map<Range, Range> waterToLight;
-    robin_hood::unordered_flat_map<Range, Range> lightToTemperature;
-    robin_hood::unordered_flat_map<Range, Range> temperatureToHumidity;
-    robin_hood::unordered_flat_map<Range, Range> humidityToLocation; 
+    robin_hood::unordered_flat_set<PropertyRange, range_hash> seedToSoilRanges;
+    robin_hood::unordered_flat_set<PropertyRange, range_hash> soilToFertilizer;
+    robin_hood::unordered_flat_set<PropertyRange, range_hash> fertilizerToWater;
+    robin_hood::unordered_flat_set<PropertyRange, range_hash> waterToLight;
+    robin_hood::unordered_flat_set<PropertyRange, range_hash> lightToTemperature;
+    robin_hood::unordered_flat_set<PropertyRange, range_hash> temperatureToHumidity;
+    robin_hood::unordered_flat_set<PropertyRange, range_hash> humidityToLocation;
 
     enum CurrentData {
         NUMBER = 0,
@@ -41,12 +55,37 @@ private:
     };
 
 public:
+    bool inConverter(PropertyRange* foundRange, int value, CurrentData convertTo) {
+        robin_hood::unordered_flat_set<PropertyRange, range_hash>* foundConverter;
+
+        switch (convertto) {
+        case SOIL: foundConverter = &seedToSoilRanges; break;
+        case FERTILIZER: foundConverter = &soilToFertilizer; break;
+        case WATER: foundConverter = &fertilizerToWater; break;
+        case LIGHT: foundConverter = &waterToLight; break;
+        case TEMPERATURE: foundConverter = &lightToTemperature; break;
+        case HUMIDITY: foundConverter = &temperatureToHumidity; break;
+        case LOCATION: foundConverter = &humidityToLocation; break;
+        default: break;
+        }
+
+        for(const PropertyRange& range : *foundConverter) {
+            if(range.inRange(value)) {
+                *foundRange = range;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     void loadSeeds() {
         const char* seedIDPos = this->input[0].c_str() + strlen("seeds: ");
         int nextOffset;
 
         size_t curSeed;
-        while(sscanf(seedIDPos, "%llu %n", &curSeed, &nextOffset) != -1) {
+        while(sscanf(seedIDPos, "%lu %n", &curSeed, &nextOffset) != -1) {
             seeds.emplace(curSeed);
 
             curSeed = {};
@@ -65,24 +104,22 @@ public:
 
             while(curLine.size()) {
                 size_t destinationStart, sourceStart, range;
-                sscanf(curLine.c_str(), "%llu %llu %llu", &destinationStart, &sourceStart, &range);
+                sscanf(curLine.c_str(), "%lu %lu %lu", &destinationStart, &sourceStart, &range);
 
-                Range destinationRange = {};
-                destinationRange.start = destinationStart;
-                destinationRange.end = destinationStart + range;
+                PropertyRange range = {};
+                range.sourceStart = sourceStart;
+                range.sourceEnd = sourceStart + range;
 
-                Range sourceRange = {};
-                sourceRange.start = sourceStart;
-                sourceRange.end = sourceStart + range;
+                range.destStart = destinationStart;
 
                 switch (curData) {
-                case CurrentData::SOIL:        seedToSoil[sourceRange] =            destinationRange; break;
-                case CurrentData::FERTILIZER:  soilToFertilizer[sourceRange] =      destinationRange; break;
-                case CurrentData::WATER:       fertilizerToWater[sourceRange] =     destinationRange; break;
-                case CurrentData::LIGHT:       waterToLight[sourceRange] =          destinationRange; break;
-                case CurrentData::TEMPERATURE: lightToTemperature[sourceRange] =    destinationRange; break;
-                case CurrentData::HUMIDITY:    temperatureToHumidity[sourceRange] = destinationRange; break;
-                case CurrentData::LOCATION:    humidityToLocation[sourceRange] =    destinationRange; break;
+                case CurrentData::SOIL:        seedToSoil.emplace(destinationRange); break;
+                case CurrentData::FERTILIZER:  soilToFertilizer.emplace(destinationRange); break;
+                case CurrentData::WATER:       fertilizerToWater.emplace(destinationRange); break;
+                case CurrentData::LIGHT:       waterToLight.emplace(destinationRange); break;
+                case CurrentData::TEMPERATURE: lightToTemperature.emplace(destinationRange); break;
+                case CurrentData::HUMIDITY:    temperatureToHumidity.emplace(destinationRange); break;
+                case CurrentData::LOCATION:    humidityToLocation.emplace(destinationRange); break;
                 default: break;
                 }
 
@@ -104,7 +141,7 @@ public:
         if(seeds.size() <= 0) loadSeeds();
         partASolution = 0;
 
-        printf("done loading %llu seeds\n", seeds.size());
+        printf("done loading %lu seeds\n", seeds.size());
 
         robin_hood::unordered_flat_map<size_t, size_t> seedValues;
 
@@ -144,8 +181,8 @@ public:
     }
 
     void printSolution(bool partA, bool partB) {
-        if(partA) printf("partA: %llu\n", partASolution);
-        if(partB) printf("partB: %llu\n", partBSolution);
+        if(partA) printf("partA: %lu\n", partASolution);
+        if(partB) printf("partB: %lu\n", partBSolution);
     }
 
     Day5() : Day("input/day5.txt") {}

@@ -26,11 +26,11 @@ struct Position {
     Coordinates coords;
 };
 
-bool operator==(Coordinates const& a, Coordinates const& b) {
+bool operator==(const Coordinates& a, const Coordinates& b) {
     return a.x == b.x && a.y == b.y; 
 }
 
-struct pair_hash {
+struct coordinates_hash {
     inline std::size_t operator()(const Coordinates& c) const {
         return ((size_t)c.x << 32) + c.y;
     }
@@ -68,7 +68,7 @@ public:
         }
     }
 
-    int getNumber(robin_hood::unordered_flat_set<Coordinates, pair_hash>& found, int x, int y) {
+    int getNumber(robin_hood::unordered_flat_set<Coordinates, coordinates_hash>& found, int x, int y) {
         if(x < 0 || x >= mapWidth || y < 0 || y >= mapHeight || found.contains({x, y}) || map[y][x].type != PositionType::NUMBER) return 0;
         int out = 0, minX = x;
 
@@ -92,7 +92,7 @@ public:
         if(map.size() <= 0) loadMap();
         partASolution = 0;
         
-        robin_hood::unordered_flat_set<Coordinates, pair_hash> found;
+        robin_hood::unordered_flat_set<Coordinates, coordinates_hash> found;
 
         for(int y = 0; y <  mapHeight; y++) {
             for(int x = 0; x < mapWidth; x++) {
@@ -109,7 +109,7 @@ public:
         if(map.size() <= 0) loadMap();
         partBSolution = 0;
         
-        robin_hood::unordered_flat_set<Coordinates, pair_hash> found;
+        robin_hood::unordered_flat_set<Coordinates, coordinates_hash> found;
 
         for(long long y = 0; y < mapHeight; y++) {
             for(long long x = 0; x < mapWidth; x++) {

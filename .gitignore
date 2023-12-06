@@ -3,5 +3,6 @@
 
 **/input/*.txt
 **/build.bat
+**/build.sh
 
 **/session-cookie
