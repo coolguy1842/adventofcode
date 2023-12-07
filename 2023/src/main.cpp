@@ -6,7 +6,7 @@
 int main(int argc, char** argv) {
     CLI::App app;
     
-    bool showTimers, partA, partB;
+    bool showTimers = false, partA = false, partB = false;
     
     app.add_flag("-t,--timers", showTimers, "Should the timers be visible?");
 
@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
     case 4: day = (AOC::Day*)new Day4(); break;
     case 5: day = (AOC::Day*)new Day5(); break;
     case 6: day = (AOC::Day*)new Day6(); break;
+    case 7: day = (AOC::Day*)new Day7(); break;
     default: fprintf(stderr, "Day not found.\n"); return -1;
     }
 
