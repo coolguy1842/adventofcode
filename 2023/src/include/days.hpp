@@ -8,5 +8,6 @@
 #include <days/Day5/Day5.hpp>
 #include <days/Day6/Day6.hpp>
 #include <days/Day7/Day7.hpp>
+#include <days/Day8/Day8.hpp>
 
 #endif
