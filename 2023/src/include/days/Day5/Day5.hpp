@@ -152,7 +152,6 @@ public:
         if(seeds.size() <= 0) loadSeeds();
         partBSolution = 0;
 
-        std::vector<std::thread> threads;
         std::mutex threadMutex;
 
         size_t threadMinValue = __LONG_MAX__;
