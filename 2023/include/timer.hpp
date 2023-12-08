@@ -42,20 +42,18 @@ public:
         std::string dashes = "";
         for(size_t i = 0; i < this->name.size(); i++) { dashes += "-"; }
 
-        long long nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(stopTime - startTime).count();
+        long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(stopTime - startTime).count();
 
         printf(
 "\n---- %s ----\n" \
 "seconds: %f\n" \
 "milliseconds %f\n" \
-"microseconds %f\n" \
-"nanoseconds %lld\n" \
+"microseconds %lld\n" \
 "-----%s-----\n",
 name.c_str(),
-(double)nanoseconds / (double)1e+9,
-(double)nanoseconds / (double)1e+6,
-(double)nanoseconds / (double)1000,
-nanoseconds,
+(double)microseconds / (double)1e+6,
+(double)microseconds / (double)1000,
+microseconds,
 dashes.c_str()
         );
     }

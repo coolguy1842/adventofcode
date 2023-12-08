@@ -17,38 +17,40 @@ private:
 
 public:
     void loadInput() {
-        char instructionsC[513];
-        sscanf(input[0].c_str(), "%s\n", instructionsC);
+        instructions = input[0];
 
-        instructions = std::string(instructionsC);
-
-        // include 4 chars(1 for null byte)
+        // each are 4 bytes(1 byte reserved for null byte)
         char location[4], leftDestination[4], rightDestination[4];
+        location[3] = leftDestination[3] = rightDestination[3] = 0;
+
         for(size_t i = 2; i < input.size(); i++) {    
-            sscanf(input[i].c_str(), "%3s = (%3s, %3s)\n", location, leftDestination, rightDestination);
-            network[std::string(location)] = { std::string(leftDestination), std::string(rightDestination) };
+            const std::string& line = input[i];
+
+            memcpy(location, line.c_str(), 3);
+            memcpy(leftDestination, line.c_str() + strlen("aaa = ("), 3);
+            memcpy(rightDestination, line.c_str() + strlen("aaa = (zzz, "), 3);
+
+            network[location] = { leftDestination, rightDestination };
 
             if(location[2] == 'A') {
-                partBStarts.push_back(std::string(location));
+                partBStarts.push_back(location);
             }
         }
     }
 
 
-    size_t findLocation(std::string start, bool partB) {
+    size_t findLocation(const std::string& start, const bool partB) {
         size_t out = 0;
         
         std::string current = start;
         while(partB ? current[2] != 'Z' : current != "ZZZ") {
-            char instruction = instructions[out % instructions.size()];
+            char instruction = instructions[out++ % instructions.size()];
 
             switch(instruction) {
             case 'L': current = network[current][0]; break;
             case 'R': current = network[current][1]; break;
             default: break;
             }
-
-            out++;
         }
 
         return out;
@@ -63,8 +65,8 @@ public:
         if(network.size() <= 0) loadInput();
 
         partBSolution = findLocation(partBStarts[0], true);
-        for(std::string& start : partBStarts) {
-            partBSolution = std::lcm(partBSolution, findLocation(start, true));
+        for(size_t i = 1; i < partBStarts.size(); i++) {
+            partBSolution = std::lcm(partBSolution, findLocation(partBStarts[i], true));
         }
     }
 
