@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
     case 7: day = (AOC::Day*)new Day7(); break;
     case 8: day = (AOC::Day*)new Day8(); break;
     case 9: day = (AOC::Day*)new Day9(); break;
+    case 10: day = (AOC::Day*)new Day10(); break;
     default: fprintf(stderr, "Day not found.\n"); return -1;
     }
 

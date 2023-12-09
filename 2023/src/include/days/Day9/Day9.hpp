@@ -4,8 +4,6 @@
 #include <day.hpp>
 #include <stdio.h>
 
-#include <robin_hood.hpp>
-
 struct History {
     std::vector<std::vector<long>> values;
 

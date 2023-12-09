@@ -46,8 +46,8 @@ public:
 
         printf(
 "\n---- %s ----\n" \
-"seconds: %f\n" \
-"milliseconds %f\n" \
+"seconds: %g\n" \
+"milliseconds %g\n" \
 "microseconds %lld\n" \
 "-----%s-----\n",
 name.c_str(),
