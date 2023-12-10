@@ -44,13 +44,15 @@ public:
         
         std::string current = start;
         while(partB ? current[2] != 'Z' : current != "ZZZ") {
-            char instruction = instructions[out++ % instructions.size()];
-
+            char instruction = instructions[out % (instructions.length() - 1)];
+            
             switch(instruction) {
             case 'L': current = network[current][0]; break;
             case 'R': current = network[current][1]; break;
             default: break;
             }
+
+            out++;
         }
 
         return out;
@@ -71,8 +73,8 @@ public:
     }
 
     void printSolution(bool partA, bool partB) {
-        if(partA) printf("partA: %llu\n", partASolution);
-        if(partB) printf("partB: %llu\n", partBSolution);
+        if(partA) printf("partA: %zu\n", partASolution);
+        if(partB) printf("partB: %zu\n", partBSolution);
     }
 
     Day8() : Day("input/day8.txt") {}

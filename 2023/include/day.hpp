@@ -23,7 +23,7 @@ protected:
 
 private:
     void readInput(std::string path) {
-        std::ifstream file(path);
+        std::ifstream file(path, std::ios_base::binary);
         std::stringstream sstream;
 
         sstream << file.rdbuf();

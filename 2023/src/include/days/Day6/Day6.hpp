@@ -23,14 +23,14 @@ public:
         int nextOffset;
 
         size_t curTime;
-        while(sscanf(timePos, "%llu %n", &curTime, &nextOffset) != -1) {
+        while(sscanf(timePos, "%zu %n", &curTime, &nextOffset) != -1) {
             races.push_back(Race { curTime, 0 });
             timePos += nextOffset;
         }
 
         const char* distancePos = this->input[1].c_str() + strlen("Distance: ");
         size_t curDistance, i = 0;
-        while(sscanf(distancePos, "%llu %n", &curDistance, &nextOffset) != -1) {
+        while(sscanf(distancePos, "%zu %n", &curDistance, &nextOffset) != -1) {
             races[i++].distance = curDistance;
             distancePos += nextOffset;
         }
@@ -38,8 +38,8 @@ public:
 
         std::string time = replace(this->input[0], " ", "");
         std::string distance = replace(this->input[1], " ", "");
-        sscanf(time.c_str(), "Time:%llu", &partBRace.time);
-        sscanf(distance.c_str(), "Distance:%llu", &partBRace.distance);
+        sscanf(time.c_str(), "Time:%zu", &partBRace.time);
+        sscanf(distance.c_str(), "Distance:%zu", &partBRace.distance);
     }
 
     bool tryTime(size_t time, size_t limit, size_t best) {
@@ -71,8 +71,8 @@ public:
     }
 
     void printSolution(bool partA, bool partB) {
-        if(partA) printf("partA: %llu\n", partASolution);
-        if(partB) printf("partB: %llu\n", partBSolution);
+        if(partA) printf("partA: %zu\n", partASolution);
+        if(partB) printf("partB: %zu\n", partBSolution);
     }
 
     Day6() : Day("input/day6.txt") {}

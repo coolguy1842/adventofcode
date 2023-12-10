@@ -85,8 +85,8 @@ public:
     }
 
     void printSolution(bool partA, bool partB) {
-        if(partA) printf("partA: %llu\n", partASolution);
-        if(partB) printf("partB: %llu\n", partBSolution);
+        if(partA) printf("partA: %zu\n", partASolution);
+        if(partB) printf("partB: %zu\n", partBSolution);
     }
 
     Day9() : Day("input/day9.txt") {}

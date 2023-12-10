@@ -80,14 +80,14 @@ public:
         int nextOffset;
 
         size_t curSeed;
-        while(sscanf(seedIDPos, "%llu %n", &curSeed, &nextOffset) != -1) {
+        while(sscanf(seedIDPos, "%zu %n", &curSeed, &nextOffset) != -1) {
             seeds.push_back(curSeed);
             seedIDPos += nextOffset;
         }
         
         size_t seedStart, seedEnd;
         seedIDPos = this->input[0].c_str() + strlen("seeds: ");
-        while(sscanf(seedIDPos, "%llu %llu %n", &seedStart, &seedEnd, &nextOffset) != -1) {
+        while(sscanf(seedIDPos, "%zu %zu %n", &seedStart, &seedEnd, &nextOffset) != -1) {
             seedRanges.push_back({seedStart, seedEnd});
             seedIDPos += nextOffset;
         }
@@ -102,7 +102,7 @@ public:
             while(curIndex < input.size() && input[curIndex].size() > 0) {
                 curLine = input[curIndex];
                 size_t destinationStart, sourceStart, range;
-                sscanf(curLine.c_str(), "%llu %llu %llu", &destinationStart, &sourceStart, &range);
+                sscanf(curLine.c_str(), "%zu %zu %zu", &destinationStart, &sourceStart, &range);
 
                 PropertyRange pRange = {};
                 pRange.sourceStart = sourceStart;
@@ -181,8 +181,8 @@ public:
     }
     
     void printSolution(bool partA, bool partB) {
-        if(partA) printf("partA: %llu\n", partASolution);
-        if(partB) printf("partB: %llu\n", partBSolution);
+        if(partA) printf("partA: %zu\n", partASolution);
+        if(partB) printf("partB: %zu\n", partBSolution);
     }
 
     Day5() : Day("input/day5.txt") {}

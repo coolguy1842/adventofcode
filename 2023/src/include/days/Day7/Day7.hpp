@@ -25,7 +25,7 @@ public:
         size_t bid;
 
         for(std::string& line : input) {
-            sscanf(line.c_str(), "%5s %llu", handChars, &bid);
+            sscanf(line.c_str(), "%5s %zu", handChars, &bid);
 
             handsA.push_back(PartA::Hand(handChars, bid));
             handsB.push_back(PartB::Hand(handChars, bid));
@@ -55,8 +55,8 @@ public:
     }
 
     void printSolution(bool partA, bool partB) {
-        if(partA) printf("partA: %llu\n", partASolution);
-        if(partB) printf("partB: %llu\n", partBSolution);
+        if(partA) printf("partA: %zu\n", partASolution);
+        if(partB) printf("partB: %zu\n", partBSolution);
     }
 
     Day7() : Day("input/day7.txt") {}
