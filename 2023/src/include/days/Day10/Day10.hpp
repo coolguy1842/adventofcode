@@ -55,6 +55,7 @@ private:
     size_t partBSolution;
     
     std::vector<std::vector<Pipe>> grid;
+    std::vector<Coordinates> verts;
     
     Coordinates animalStart;
 
@@ -71,55 +72,65 @@ public:
         }
     }
 
-    Coordinates nextPipe(Coordinates from, robin_hood::unordered_flat_set<Coordinates, coordinates_hash>& travelled) {
+    void findPipes(Coordinates from) {
         const Pipe& current = grid[from.y][from.x];
 
-        if(current.hasSouth()) {
-            const Pipe& next = grid[from.y + 1][from.x];
-            if(next.isPipe() && next.hasNorth() && !travelled.contains(next.coords)) {
-                if(current.c != 'S') travelled.emplace(from);
-                return next.coords;
+        if(current.hasSouth() && from.y + 1 < (long)grid.size()) {
+            Pipe& next = grid[from.y + 1][from.x];
+            if(next.isPipe() && next.hasNorth() && !next.inMainLoop) {
+                verts.push_back(next.coords);
+                next.inMainLoop = true;
+                findPipes(next.coords);
             }
         }
 
-        if(current.hasEast()) {
-            const Pipe& next = grid[from.y][from.x + 1];
-
-            if(next.isPipe() && next.hasWest() && !travelled.contains(next.coords)) {
-                if(current.c != 'S') travelled.emplace(from);
-                return next.coords;
-            }
-        }
-        
-        if(current.hasNorth()) {
-            const Pipe& next = grid[from.y - 1][from.x];
-            if(next.isPipe() && next.hasSouth() && !travelled.contains(next.coords)) {
-                if(current.c != 'S') travelled.emplace(from);
-                return next.coords;
+        if(current.hasEast()  && from.x + 1 < (long)grid[0].size()) {
+            Pipe& next = grid[from.y][from.x + 1];
+            if(next.isPipe() && next.hasWest() && !next.inMainLoop) {
+                verts.push_back(next.coords);
+                next.inMainLoop = true;
+                findPipes(next.coords);
             }
         }
         
-        if(current.hasWest()) {
-            const Pipe& next = grid[from.y][from.x - 1];
-            if(next.isPipe() && next.hasEast() && !travelled.contains(next.coords)) {
-                if(current.c != 'S') travelled.emplace(from);
-                return next.coords;
+        if(current.hasNorth() && from.y - 1 >= 0) {
+            Pipe& next = grid[from.y - 1][from.x];
+            if(next.isPipe() && next.hasSouth() && !next.inMainLoop) {
+                verts.push_back(next.coords);
+                next.inMainLoop = true;
+                findPipes(next.coords);
             }
         }
-
-
-        return from;
+        
+        if(current.hasWest() && from.x - 1 >= 0) {
+            Pipe& next = grid[from.y][from.x - 1];
+            if(next.isPipe() && next.hasEast() && !next.inMainLoop) {
+                verts.push_back(next.coords);
+                next.inMainLoop = true;
+                findPipes(next.coords);
+            }
+        }
     }
 
     size_t findFurthestDistance(Coordinates start) {
         robin_hood::unordered_flat_set<Coordinates, coordinates_hash> travelled;
         size_t out = 0;
 
-        Coordinates cur = start;
-        do {
-            grid[cur.y][cur.x].inMainLoop = true;
-            out++;
-        } while((cur = nextPipe(cur, travelled)) != start);
+        findPipes(start);
+
+        for(size_t y = 0; y < grid.size(); y++) {
+            for(size_t x = 0; x < grid[0].size(); x++) {
+                Pipe& pipe = grid[y][x];
+
+                if(pipe.isPipe()) {
+                    if(pipe.inMainLoop) out++;
+                    else {
+                        pipe.c = '.';
+                        pipe.directions = 0;
+                    }
+                }
+            }   
+        }
 
         return out / 2;
     }
@@ -127,91 +138,44 @@ public:
     void partA() {
         if(grid.size() <= 0) loadGrid();
         partASolution = findFurthestDistance(animalStart);
-
-        for(size_t y = 0; y < input.size(); y++) {
-            for(size_t x = 0; x < input[0].size(); x++) {
-                const Pipe& pipe = grid[y][x];
-                
-                if(pipe.isPipe() && !pipe.inMainLoop) printf("#");
-                else printf("%c", input[y][x]);
-            }
-
-            printf("\n");
-        }
     }
 
+    bool isEnclosed(Coordinates coords) {
+        size_t j = verts.size() - 1;
+        bool ret = false;
 
-    bool isEnclosed(Coordinates coords, robin_hood::unordered_flat_set<Coordinates, coordinates_hash>& checked) {
-        checked.emplace(coords);
+        for(size_t i = 0; i < verts.size(); i++) {
+            if (coords == verts[i]) return true;
 
-        if(coords.x + 1 >= (long)grid[0].size() || coords.x - 1 < 0 || coords.y + 1 >= (long)grid.size() || coords.y - 1 < 0) return false;
+            if ((verts[i].y > coords.y) != (verts[j].y > coords.y)) {
+                long slope = (coords.x - verts[i].x) * (verts[j].y - verts[i].y) - (verts[j].x - verts[i].x) * (coords.y - verts[i].y);
 
-        for(int i = -1; i <= 1; i += 2) {
-            Pipe pipe = grid[coords.y][coords.x + i];
-            if(!pipe.isPipe() && !checked.contains(pipe.coords)) {
-                if(!isEnclosed(pipe.coords, checked)) return false;
+                if(slope == 0) return true;
+                if((slope < 0) != (verts[j].y < verts[i].y)) ret = !ret;
             }
 
-            pipe = grid[coords.y + i][coords.x];
-            if(!pipe.isPipe() && !checked.contains(pipe.coords)) {
-                if(!isEnclosed(pipe.coords, checked)) return false;
-            }
-        }
-        
-        return true;
-    }
-
-    size_t enclosedCount(const Coordinates& coords, robin_hood::unordered_flat_set<Coordinates, coordinates_hash>& found) {
-        size_t out = 1;
-
-        found.emplace(coords);
-
-        for(int i = -1; i <= 1; i += 2) {
-            Coordinates coord = Coordinates(coords.x + i, coords.y);
-            if(coord.x >= 0 && coord.x < (int)input[0].size()) {
-                if(!grid[coord.y][coord.x].isPipe() && !found.contains(coord)) {
-                    out += enclosedCount(coord, found);
-                }
-            }
-            
-            coord = Coordinates(coords.x, coords.y + i);
-            if(coord.y >= 0 && coord.y < (int)input.size()) {
-                if(!grid[coord.y][coord.x].isPipe() && !found.contains(coord)) {
-                    out += enclosedCount(coord, found);
-                }
-            }
+            j = i;
         }
 
-        return out;
+        return ret;
     }
 
     void partB() {
-        robin_hood::unordered_flat_set<Coordinates, coordinates_hash> found;
-        robin_hood::unordered_flat_set<Coordinates, coordinates_hash> checked;
-
-        if(grid.size() <= 0) loadGrid();
-        partBSolution = 0;
-        
-         for(long y = 0; y < (long)grid.size(); y++) {
-            for(long x = 0; x < (long)grid[0].size(); x++) {
-                Pipe& pipe = grid[y][x];
-
-                if(pipe.isPipe() && !pipe.inMainLoop) {
-                    pipe.c = '.';
-                    pipe.directions = 0;
-                }
-            }
+        if(grid.size() <= 0) {
+            loadGrid();
+            // load main pipe system and verts
+            findFurthestDistance(animalStart);
         }
 
+        partBSolution = 0;
+        
         for(long y = 0; y < (long)grid.size(); y++) {
             for(long x = 0; x < (long)grid[0].size(); x++) {
                 Pipe& pipe = grid[y][x];
 
-                if(pipe.isPipe()) continue;
-                if(found.contains(pipe.coords) || checked.contains(pipe.coords)) continue;
-                if(!isEnclosed(pipe.coords, checked)) continue;
-
-                partBSolution += enclosedCount(pipe.coords, found);
+                if(!pipe.isPipe()) {
+                    partBSolution += isEnclosed(pipe.coords);
+                }
             }
         }
     }
