@@ -2,6 +2,7 @@
 #define __DAY3_HPP__
 
 #include <day.hpp>
+#include <util/helperStructs.hpp>
 
 #include <robin_hood.hpp>
 
@@ -14,26 +15,11 @@ enum PositionType {
     NUMBER
 };
 
-struct Coordinates {
-    int x;
-    int y;
-};
-
 struct Position {
     PositionType type;
     char c;
 
     Coordinates coords;
-};
-
-bool operator==(const Coordinates& a, const Coordinates& b) {
-    return a.x == b.x && a.y == b.y; 
-}
-
-struct coordinates_hash {
-    inline std::size_t operator()(const Coordinates& c) const {
-        return ((size_t)c.x << 32) + c.y;
-    }
 };
 
 class Day3 : public AOC::Day {
@@ -51,7 +37,7 @@ private:
 public:
     void loadMap() {
         mapWidthULL = input[0].size(), mapHeightULL = input.size();
-        mapWidth = (int)mapWidthULL, mapHeight = (int)mapHeightULL;
+        mapWidth = (long)mapWidthULL, mapHeight = (long)mapHeightULL;
         
         this->map = std::vector<std::vector<Position>>(mapHeightULL);
 
@@ -74,7 +60,7 @@ public:
 
         while(map[y][--minX].type == PositionType::NUMBER);
 
-        for(int i = minX + 1; i < mapWidth; i++) {
+        for(long i = minX + 1; i < mapWidth; i++) {
             Position pos = map[y][i];
             if(pos.type != PositionType::NUMBER) break;
         
@@ -94,8 +80,8 @@ public:
         
         robin_hood::unordered_flat_set<Coordinates, coordinates_hash> found;
 
-        for(int y = 0; y <  mapHeight; y++) {
-            for(int x = 0; x < mapWidth; x++) {
+        for(long y = 0; y <  mapHeight; y++) {
+            for(long x = 0; x < mapWidth; x++) {
                 if(map[y][x].type != PositionType::SYMBOL) continue;
 
                 for(int i = 0; i < 9; i++) {
