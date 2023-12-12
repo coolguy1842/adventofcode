@@ -31,7 +31,7 @@ include(CPack)
 
 target_link_libraries(adventofcode PRIVATE $<$<BOOL:${MINGW}>:ws2_32> CLI11::CLI11 pthread $<$<BOOL:${MINGW}>:tbb12>)
 target_compile_options(adventofcode PRIVATE -ffast-math -O3 -Wall -pipe -march=native)
-set_property(TARGET adventofcode PROPERTY CXX_STANDARD 20)
+set_property(TARGET adventofcode PROPERTY CXX_STANDARD 23)
 
 
 add_custom_target(
