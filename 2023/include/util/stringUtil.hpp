@@ -5,11 +5,11 @@
 #include <string>
 #include <string.h>
 
-std::vector<std::string> split(std::string& str, char delim) {
+std::vector<std::string> split(const std::string& str, char delim) {
     std::vector<std::string> out;
     std::string substr;
 
-    for(char& c : str) {
+    for(const char& c : str) {
         if(c == delim) {
             out.push_back(substr);
             substr.clear();
@@ -25,19 +25,20 @@ std::vector<std::string> split(std::string& str, char delim) {
     return out;
 }
 
-std::vector<std::string> split(std::string str, std::string delim) {
+std::vector<std::string> split(const std::string& str, std::string delim) {
     std::vector<std::string> out;
     std::string substr;
+    std::string next = str;
 
     size_t pos = 0;
     
-    while((pos = str.find(delim)) != std::string::npos) {
-        out.push_back(str.substr(0, pos));
+    while((pos = next.find(delim)) != std::string::npos) {
+        out.push_back(next.substr(0, pos));
         
-        str = str.substr(pos + delim.length());
+        next = next.substr(pos + delim.length());
     }
 
-    if(str.size() > 0) out.push_back(str);
+    if(next.size() > 0) out.push_back(next);
 
     return out;
 }
