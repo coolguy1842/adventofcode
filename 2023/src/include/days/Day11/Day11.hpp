@@ -11,7 +11,6 @@
 struct Galaxy {
     size_t number;
     Coordinates coords;
-    Coordinates offset;
 
     size_t distance(const Galaxy& from) const {
         return std::abs(coords.x - from.coords.x) + std::abs(coords.y - from.coords.y);
@@ -71,7 +70,7 @@ public:
                 size_t colOffset = colOffsets[j];
 
                 Coordinates coords = Coordinates(j + colOffset, i + rowOffset);
-                Galaxy galaxy = { nextID++, coords, Coordinates(colOffset, rowOffset) };
+                Galaxy galaxy = { nextID++, coords};
 
                 galaxies.push_back(galaxy);
             }

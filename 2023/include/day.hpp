@@ -28,7 +28,7 @@ private:
 
         sstream << file.rdbuf();
         rawInput = sstream.str();
-        input = split(rawInput, "\n");
+        input = split(rawInput, "\r\n");
     }
 
 public:
