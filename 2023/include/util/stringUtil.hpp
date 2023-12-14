@@ -26,17 +26,22 @@ std::vector<std::string> split(const std::string& str, char delim) {
 }
 
 std::vector<std::string> split(const std::string& str, std::string delim) {
-    std::vector<std::string> out;
+    std::vector<std::string> result;
 
-    char* cur;
-    cur = strtok((char*)str.c_str(), delim.c_str()); 
-    while(cur != NULL) {
-        out.push_back(cur);
+    size_t start = 0;
+    size_t end = str.find(delim);
+    while(end != std::string::npos) {
+        auto sub = str.substr(start, end - start);
+        result.push_back(sub);
 
-        cur = strtok(NULL, delim.c_str());
+        start = end + delim.length();
+        end = str.find(delim, start);
     }
 
-    return out;
+    auto sub = str.substr(start, end - start);
+    result.push_back(sub);
+
+    return result;
 }
 
 std::string replace(std::string str, std::string find, std::string replace) {

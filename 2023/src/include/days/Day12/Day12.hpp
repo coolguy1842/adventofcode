@@ -4,9 +4,7 @@
 #include <day.hpp>
 #include <stdio.h>
 
-#include <iostream>
 #include <robin_hood.hpp>
-
 #include <util/range.hpp>
 
 enum SpringType {
