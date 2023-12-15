@@ -10,7 +10,7 @@
 #include <vector>
 
 enum PositionType {
-    EMPTY = 0,
+    NONE = 0,
     SYMBOL,
     NUMBER
 };
@@ -48,7 +48,7 @@ public:
                 char c = input[y][x];
 
                 if(isdigit(c)) map[y][x] = { PositionType::NUMBER, c, x, y };
-                else if(c == '.') map[y][x] = { PositionType::EMPTY, c, x, y };
+                else if(c == '.') map[y][x] = { PositionType::NONE, c, x, y };
                 else map[y][x] = { PositionType::SYMBOL, c, x, y };
             }
         }

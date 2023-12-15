@@ -17,17 +17,11 @@ public:
     std::vector<std::vector<MapObject>> rows;
 
 private:
-    bool vertical = false;
-    bool directionKnown = false;
+    bool vertical = false, directionKnown = false;
+    bool verticalB = false, directionKnownB = false;
     
-    bool verticalB = false;
-    bool directionKnownB = false;
-    
-    long long verticalMiddle;
-    long long horizontalMiddle;
-    
-    long long verticalMiddleB;
-    long long horizontalMiddleB;
+    long long verticalMiddle, horizontalMiddle;
+    long long verticalMiddleB, horizontalMiddleB;
 
     std::vector<MapObject> verticalObject(size_t i) {
         std::vector<MapObject> out;
@@ -38,15 +32,6 @@ private:
 
         return out;
     }
-
-    void printObjects(std::vector<MapObject> objects) {
-        for(MapObject obj : objects) {
-            printf("%c", obj);
-        }
-
-        printf("\n");
-    }
-
 
     // both strings are assumed to be the same length
     size_t objDifferences(std::vector<MapObject> a, std::vector<MapObject> b) {
@@ -145,7 +130,6 @@ public:
         loadHorizontal(true);
         if(!directionKnownB) loadVertical(true);
     }
-
 };
 
 

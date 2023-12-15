@@ -4,7 +4,6 @@
 #include <day.hpp>
 #include <stdio.h>
 
-
 class DayNUM : public AOC::Day {
 private:
     size_t partASolution;
