@@ -19,67 +19,109 @@ public:
 private:
     bool vertical = false;
     bool directionKnown = false;
+    
+    bool verticalB = false;
+    bool directionKnownB = false;
+    
+    long long verticalMiddle;
+    long long horizontalMiddle;
+    
+    long long verticalMiddleB;
+    long long horizontalMiddleB;
 
-    size_t verticalMiddle;
-    size_t horizontalMiddle;
-
-    std::string verticalString(size_t i) {
-        std::string out = "";
+    std::vector<MapObject> verticalObject(size_t i) {
+        std::vector<MapObject> out;
         
         for(size_t j : range(rows.size())) {
-            out += rows[j][i];
+            out.push_back(rows[j][i]);
         }
 
         return out;
     }
 
+    void printObjects(std::vector<MapObject> objects) {
+        for(MapObject obj : objects) {
+            printf("%c", obj);
+        }
 
-    void loadHorizontal() {
+        printf("\n");
+    }
+
+
+    // both strings are assumed to be the same length
+    size_t objDifferences(std::vector<MapObject> a, std::vector<MapObject> b) {
+        size_t differences = 0;
+
+        for(size_t i = 0; i < a.size(); i++) {
+            if(a[i] != b[i]) differences++;
+        }
+
+        return differences;
+    }
+
+
+    void loadHorizontal(bool partB = false) {
         for(long long i = (long long)rows.size() - 2; i >= 0; i--) {
-            if(rows[i] == rows[i + 1]) {
-                size_t middle = i;
+            if(partB && (!vertical && horizontalMiddle == i)) continue;
+            size_t differences = 0;
+           
+            long long left, right;
+            for(left = i, right = i + 1; left >= 0 && right < (long long)rows.size(); left--, right++) {
+                differences += objDifferences(rows[left], rows[right]);
 
-                bool isValid = true;
-                long long left, right;
-                for(left = middle, right = middle + 1; left >= 0 && right < (long long)rows.size(); left--, right++) {
-                    if(rows[left] != rows[right]) {
-                        isValid = false;
-                        break;
-                    }
+                if(differences > partB) {
+                    break;
                 }
+            }
 
-                if((left <= 0 || right >= (long long)rows.size() - 1) && isValid) {
+            if((left <= 0 || right >= (long long)rows.size() - 1) && differences == partB) {
+                if(!partB) {
                     vertical = false;
                     directionKnown = true;
-                    
-                    horizontalMiddle = middle;
-                    return;
-                }                
+
+                    horizontalMiddle = i;
+                }
+                else {
+                    verticalB = false;
+                    directionKnownB = true;
+
+                    horizontalMiddleB = i;
+                }
+                
+                return;
             }
         }
     }
     
-    void loadVertical() {
+    void loadVertical(bool partB = false) {
         for(long long i = (long long)rows[0].size() - 2; i >= 0; i--) {
-            if(verticalString(i) == verticalString(i + 1)) {
-                size_t middle = i;
-                
-                bool isValid = true;
-                long long left, right;
-                for(left = middle, right = middle + 1; left >= 0 && right < (long long)rows[0].size(); left--, right++) {
-                    if(verticalString(left) != verticalString(right)) {
-                        isValid = false;
-                        break;
-                    }
-                }
+            if(partB && (vertical && verticalMiddle == i)) continue;
+            size_t differences = 0;
+           
+            long long left, right;
+            for(left = i, right = i + 1; left >= 0 && right < (long long)rows[0].size(); left--, right++) {
+                differences += objDifferences(verticalObject(left), verticalObject(right));
 
-                if((left <= 0 || right >= (long long)rows[0].size() - 1) && isValid) {
+                if(differences > partB) {
+                    break;
+                }
+            }
+
+            if((left <= 0 || right >= (long long)rows[0].size() - 1) && differences == partB) {
+                if(!partB) {
                     vertical = true;
                     directionKnown = true;
 
-                    verticalMiddle = middle;
-                    return;
+                    verticalMiddle = i;
                 }
+                else {
+                    verticalB = true;
+                    directionKnownB = true;
+
+                    verticalMiddleB = i;
+                }
+                
+                return;
             }
         }
     }
@@ -87,18 +129,24 @@ private:
 public:
     std::vector<std::vector<MapObject>> getRows() { return rows; }
 
-    bool isVertical() const { return vertical; }
-    bool isHorizontal() const { return !vertical; }
+    bool isVertical(bool partB = false) const { return partB ? verticalB : vertical; }
+    bool isHorizontal(bool partB = false) const { return partB ? !verticalB : !vertical; }
     
-    size_t getVerticalMiddle() const { return verticalMiddle; }
-    size_t getHorizontalMiddle() const { return horizontalMiddle; }
+    long long getVerticalMiddle() const { return verticalMiddle; }
+    long long getHorizontalMiddle() const { return horizontalMiddle; }
+    
+    long long getVerticalMiddleB() const { return verticalMiddleB; }
+    long long getHorizontalMiddleB() const { return horizontalMiddleB; }
 
     Map(std::vector<std::vector<MapObject>> rows) : rows(rows) {
-        loadHorizontal();
-        if(!directionKnown) loadVertical();
+        loadHorizontal(false);
+        if(!directionKnown) loadVertical(false);
+
+        loadHorizontal(true);
+        if(!directionKnownB) loadVertical(true);
     }
 
-};// 34911
+};
 
 
 class Day13 : public AOC::Day {
@@ -144,7 +192,13 @@ public:
     }
 
     void partB() {
+        if(maps.size() <= 0) loadMaps();
         partBSolution = 0;
+
+        for(Map& map : maps) {
+            if(map.isVertical(true)) partBSolution += map.getVerticalMiddleB() + 1;
+            if(map.isHorizontal(true)) partBSolution += (map.getHorizontalMiddleB() + 1) * 100;
+        }
     }
 
     void printSolution(bool partA, bool partB) {
