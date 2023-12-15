@@ -31,7 +31,7 @@ public:
         std::regex re("(\\d)");
         partASolution = 0;
 
-        for(std::string line : this->input) {
+        for(const std::string& line : this->input) { 
             std::vector<int> digits = {};
             
             std::smatch res;

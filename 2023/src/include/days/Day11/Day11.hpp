@@ -51,7 +51,7 @@ public:
         rowOffsets.reserve(input.size());
 
         size_t curColOffset = 0;
-        for(size_t col = 0; col < input[0].size() - 1; col++) {
+        for(size_t col = 0; col < input[0].size(); col++) {
             colOffsets[col] = curColOffset;
             if(colEmpty(col, input)) curColOffset += expansion;
         }

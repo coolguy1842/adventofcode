@@ -44,7 +44,7 @@ public:
         
         std::string current = start;
         while(partB ? current[2] != 'Z' : current != "ZZZ") {
-            char instruction = instructions[out % (instructions.length() - 1)];
+            char instruction = instructions[out % instructions.size()];
             
             switch(instruction) {
             case 'L': current = network[current][0]; break;
