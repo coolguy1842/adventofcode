@@ -29,8 +29,16 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_options(adventofcode PRIVATE -ffast-math -O3 -Wall -pipe -march=native)
+else()
+    target_compile_options(adventofcode PRIVATE -Wall -pipe -g3)
+    set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG")
+endif()
+
 target_link_libraries(adventofcode PRIVATE $<$<BOOL:${MINGW}>:ws2_32> CLI11::CLI11 pthread $<$<BOOL:${MINGW}>:tbb12>)
-target_compile_options(adventofcode PRIVATE -ffast-math -O3 -Wall -pipe -march=native)
+
 set_property(TARGET adventofcode PROPERTY CXX_STANDARD 23)
 
 

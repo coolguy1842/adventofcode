@@ -6,7 +6,8 @@
 #include <day.hpp>
 #include <stdio.h>
 
-
+namespace D13 {
+    
 enum MapObject {
     ASH = 0,
     ROCK
@@ -131,6 +132,7 @@ public:
         if(!directionKnownB) loadVertical(true);
     }
 };
+};
 
 
 class Day13 : public AOC::Day {
@@ -138,30 +140,30 @@ private:
     size_t partASolution;
     size_t partBSolution;
 
-    std::vector<Map> maps;
+    std::vector<D13::Map> maps;
     
 public:
     void loadMaps() {
-        std::vector<std::vector<MapObject>> current;
+        std::vector<std::vector<D13::MapObject>> current;
 
         for(const std::string& line : input) {
             if(line.size() <= 1) {
-                maps.push_back(Map(current));
+                maps.push_back(D13::Map(current));
                 current = {};
 
                 continue;
             }
 
-            std::vector<MapObject> objects = {};
+            std::vector<D13::MapObject> objects = {};
             for(const char& c : line) {
-                objects.push_back((MapObject)c);
+                objects.push_back((D13::MapObject)c);
             }
 
             current.push_back(objects);
         }
 
         if(current.size() > 0) {
-            maps.push_back(Map(current));
+            maps.push_back(D13::Map(current));
         }
     }
 
@@ -169,7 +171,7 @@ public:
         if(maps.size() <= 0) loadMaps();
         partASolution = 0;
 
-        for(Map& map : maps) {
+        for(D13::Map& map : maps) {
             if(map.isVertical()) partASolution += map.getVerticalMiddle() + 1;
             if(map.isHorizontal()) partASolution += (map.getHorizontalMiddle() + 1) * 100;
         }
@@ -179,7 +181,7 @@ public:
         if(maps.size() <= 0) loadMaps();
         partBSolution = 0;
 
-        for(Map& map : maps) {
+        for(D13::Map& map : maps) {
             if(map.isVertical(true)) partBSolution += map.getVerticalMiddleB() + 1;
             if(map.isHorizontal(true)) partBSolution += (map.getHorizontalMiddleB() + 1) * 100;
         }

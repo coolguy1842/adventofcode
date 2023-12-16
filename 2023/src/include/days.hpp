@@ -16,5 +16,6 @@
 #include <days/Day13/Day13.hpp>
 #include <days/Day14/Day14.hpp>
 #include <days/Day15/Day15.hpp>
+#include <days/Day16/Day16.hpp>
 
 #endif
