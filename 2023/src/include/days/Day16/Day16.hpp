@@ -119,7 +119,6 @@ public:
                 continue;
             }
 
-
             charged.emplace(light.coords);
             travelled.emplace(Light { light.coords, light.direction });
             stepLight(light);
@@ -175,18 +174,18 @@ public:
 
                 std::vector<Light::Direction> directions;
                 if(y == 0) directions.push_back(Light::Direction::SOUTH);
-                else if(y > 0) directions.push_back(Light::Direction::NORTH);
+                else if(y == mapB.grid.size() - 1) directions.push_back(Light::Direction::NORTH);
 
                 if(x == 0) directions.push_back(Light::Direction::EAST);
-                else if(x > 0) directions.push_back(Light::Direction::WEST);
+                else if(x == mapB.grid[0].size() - 1) directions.push_back(Light::Direction::WEST);
 
                 for(const Light::Direction& dir : directions) {
                     mapB.travelled = {};
                     mapB.charged = {};
 
                     mapB.lights.push_back({ Coordinates(x, y), dir });
+
                     while(mapB.step());
-                    
                     partBSolution = std::max(partBSolution, mapB.charged.size());
                 }
             }

@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
     app.add_flag("-a,--parta", partA, "Should part a be run?");
     app.add_flag("-b,--partb", partB, "Should part b be run?");
 
-    int dayNum;
+    int dayNum = 1;
     app.add_option("day", dayNum)->required();
 
     CLI11_PARSE(app, argc, argv);
@@ -36,6 +36,15 @@ int main(int argc, char** argv) {
     case 14: day = (AOC::Day*)new Day14(); break;
     case 15: day = (AOC::Day*)new Day15(); break;
     case 16: day = (AOC::Day*)new Day16(); break;
+    case 17: day = (AOC::Day*)new Day17(); break;
+    // case 18: day = (AOC::Day*)new Day18(); break;
+    // case 19: day = (AOC::Day*)new Day19(); break;
+    // case 20: day = (AOC::Day*)new Day20(); break;
+    // case 21: day = (AOC::Day*)new Day21(); break;
+    // case 22: day = (AOC::Day*)new Day22(); break;
+    // case 23: day = (AOC::Day*)new Day23(); break;
+    // case 24: day = (AOC::Day*)new Day24(); break;
+    // case 25: day = (AOC::Day*)new Day25(); break;
     default: fprintf(stderr, "Day not found.\n"); return -1;
     }
 
