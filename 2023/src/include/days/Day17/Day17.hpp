@@ -31,35 +31,48 @@ struct cell {
     int lowest = __INT_MAX__;
 };
 
-std::array<cell*, 4> getValidNeighbours(position& pos, std::vector<dijkstra::cell*> prevCells, std::vector<std::vector<cell>>& grid, const size_t& width, const size_t& height) {
-    std::array<cell*, 4> neighbours = {nullptr, nullptr, nullptr, nullptr};
+enum direction {
+    NORTH = 0,
+    SOUTH,
+    EAST,
+    WEST,
+    NONE
+};
 
-    size_t lastDirChange = prevCells.size();
-    for(long long i = (long long)prevCells.size() - 2; i > 0; i--) {
-        cell* right = prevCells[i + 1], *mid = prevCells[i], *left = prevCells[i - 1];
-        if(left->position.x != right->position.x && left->position.y != right->position.y) {
-            lastDirChange = prevCells.size() - i;
+struct neighbour {
+    dijkstra::cell* cell;
+    dijkstra::direction direction;
+};
+
+std::vector<neighbour> getValidNeighbours(position& pos, std::vector<dijkstra::neighbour> path, std::vector<std::vector<cell>>& grid, const size_t& width, const size_t& height) {
+    std::vector<neighbour> neighbours;
+
+    size_t lastDirChange = path.size();
+    for(long long i = (long long)path.size() - 1; i > 0; i--) {
+        dijkstra::neighbour right = path[i], left = path[i - 1];
+        if(right.direction != left.direction) {
+            lastDirChange = path.size() - i;
             break;
         }
     }
 
-    if(lastDirChange <= 3) {
-        if(pos.x > 0) neighbours[0] = &grid[pos.y][pos.x - 1];
-        if(pos.x < width - 1) neighbours[1] = &grid[pos.y][pos.x + 1];
+    if(lastDirChange < 3) {
+        if(pos.y > 0) neighbours.push_back({ &grid[pos.y - 1][pos.x], dijkstra::direction::NORTH });
+        if(pos.y < height - 1) neighbours.push_back({ &grid[pos.y + 1][pos.x], dijkstra::direction::SOUTH });
 
-        if(pos.y > 0) neighbours[2] = &grid[pos.y - 1][pos.x];
-        if(pos.y < height - 1) neighbours[3] = &grid[pos.y + 1][pos.x];
+        if(pos.x > 0) neighbours.push_back({ &grid[pos.y][pos.x - 1], dijkstra::direction::WEST });
+        if(pos.x < width - 1) neighbours.push_back({ &grid[pos.y][pos.x + 1], dijkstra::direction::EAST });
 
         return neighbours;
     }
 
 
-    cell* lastDirCell = prevCells[prevCells.size() - 2];
-    if(lastDirCell->position.y != pos.y && pos.x > 0) neighbours[0] = &grid[pos.y][pos.x - 1];
-    if(lastDirCell->position.y != pos.y && pos.x < width - 1) neighbours[1] = &grid[pos.y][pos.x + 1];
+    dijkstra::neighbour& prev = path[path.size() - 2];
+    if(prev.direction != dijkstra::direction::NORTH && pos.y > 0) neighbours.push_back({ &grid[pos.y - 1][pos.x], dijkstra::direction::NORTH });
+    if(prev.direction != dijkstra::direction::SOUTH && pos.y < height - 1) neighbours.push_back({ &grid[pos.y + 1][pos.x], dijkstra::direction::SOUTH });
     
-    if(lastDirCell->position.x != pos.x && pos.y > 0) neighbours[2] = &grid[pos.y - 1][pos.x];
-    if(lastDirCell->position.x != pos.x && pos.y < height - 1) neighbours[3] = &grid[pos.y + 1][pos.x];
+    if(prev.direction != dijkstra::direction::WEST && pos.x > 0) neighbours.push_back({ &grid[pos.y][pos.x - 1], dijkstra::direction::WEST });
+    if(prev.direction != dijkstra::direction::EAST && pos.x < width - 1) neighbours.push_back({ &grid[pos.y][pos.x + 1], dijkstra::direction::EAST });
 
     return neighbours;
 }
@@ -69,7 +82,7 @@ int dijkstraSearch(struct std::vector<std::vector<dijkstra::cell>>& grid, const 
         dijkstra::cell* cell;
         int totalCost = 0;
         
-        std::vector<dijkstra::cell*> prevCells;
+        std::vector<dijkstra::neighbour> path;
         
         bool operator>(const queueContents& qC) const { return totalCost > qC.totalCost; }
     };
@@ -78,27 +91,33 @@ int dijkstraSearch(struct std::vector<std::vector<dijkstra::cell>>& grid, const 
     robin_hood::unordered_flat_map<dijkstra::position, size_t, dijkstra::position_hash> dists;
     for(size_t y : range(grid.size())) for(size_t x : range(grid[0].size())) dists[{ x, y }] = maxScore;
     
-    queueContents end = { &grid[dest.y][dest.x], maxScore, {} };
-
-    queue.push({ &grid[start.y][start.x], 0, {} });
-
+    queueContents end = { &grid[dest.y][dest.x], maxScore };
+    queue.push({ &grid[start.y][start.x], 0, { { &grid[start.y][start.x], NONE } } });
+        
     while (!queue.empty()) {
         const struct queueContents cur = queue.top();
         queue.pop();
 
-        auto newPrev = cur.prevCells;
-        newPrev.push_back(cur.cell);
-     
-        for (cell* cell : getValidNeighbours(cur.cell->position, newPrev, grid, grid[0].size(), grid.size())) {
-            if(cell == nullptr || dists[cell->position] < cur.totalCost + cell->heatLoss) continue;
+        for (dijkstra::neighbour& neighbour : getValidNeighbours(cur.cell->position, cur.path, grid, grid[0].size(), grid.size())) {
+            if(dists[neighbour.cell->position] < cur.totalCost + neighbour.cell->heatLoss) continue;
                
-            dists[cell->position] = cur.totalCost + cell->heatLoss;
-            if(cell->position == dest && end.totalCost > cur.totalCost + cell->heatLoss) {
-                end = { cell, cur.totalCost + cell->heatLoss, newPrev };
+            dists[neighbour.cell->position] = cur.totalCost + neighbour.cell->heatLoss;
+            if(neighbour.cell->position == dest && end.totalCost > dists[neighbour.cell->position]) {
+                end.totalCost = dists[neighbour.cell->position];
+                
+                auto newPath = cur.path;
+                newPath.push_back(neighbour);
+
+                end.path = newPath;
+
                 continue;
             }
 
-            queue.push({ cell, cur.totalCost + cell->heatLoss, newPrev });
+            
+            auto newPath = cur.path;
+            newPath.push_back(neighbour);
+
+            queue.push({ neighbour.cell, cur.totalCost + neighbour.cell->heatLoss, newPath });
         }
     }
 
@@ -106,10 +125,10 @@ int dijkstraSearch(struct std::vector<std::vector<dijkstra::cell>>& grid, const 
     for(size_t y : range(grid.size())) {
         for(size_t x : range(grid[0].size())) {
             bool found = false;
-            for(size_t c : range(end.prevCells.size())) {
-                auto cur = end.prevCells[c];
+            for(size_t c : range(end.path.size())) {
+                auto cur = end.path[c];
 
-                if(cur->position.x == x && cur->position.y == y) {
+                if(cur.cell->position.x == x && cur.cell->position.y == y) {
                     if(c == 0) {
                         printf("#");
                         found = true;
@@ -117,12 +136,12 @@ int dijkstraSearch(struct std::vector<std::vector<dijkstra::cell>>& grid, const 
                     }
                     
                     
-                    auto prev = end.prevCells[c - 1];
+                    auto prev = end.path[c - 1];
 
-                    if(cur->position.x > prev->position.x) printf(">");
-                    else if(cur->position.x < prev->position.x) printf("<");
-                    else if(cur->position.y > prev->position.y) printf("v");
-                    else if(cur->position.y < prev->position.y) printf("^");
+                    if(cur.cell->position.x > prev.cell->position.x) printf(">");
+                    else if(cur.cell->position.x < prev.cell->position.x) printf("<");
+                    else if(cur.cell->position.y > prev.cell->position.y) printf("v");
+                    else if(cur.cell->position.y < prev.cell->position.y) printf("^");
                     else {
                         printf("#");
                     }
