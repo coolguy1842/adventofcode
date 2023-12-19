@@ -66,68 +66,19 @@ std::array<cell*, 4> getValidNeighbours(position& pos, std::vector<dijkstra::cel
 
 int dijkstraSearch(struct std::vector<std::vector<dijkstra::cell>>& grid, const struct position& start, const struct position& dest, int maxScore = __INT_MAX__) {
     struct queueContents {
-        cell* cell;
+        dijkstra::cell* cell;
         int totalCost = 0;
         
         std::vector<dijkstra::cell*> prevCells;
-        robin_hood::unordered_flat_set<dijkstra::position, dijkstra::position_hash> travelled;
-
+        
         bool operator>(const queueContents& qC) const { return totalCost > qC.totalCost; }
     };
 
-    
-    /*std::priority_queue<queueContents, std::vector<queueContents>, std::greater<queueContents>> queue;
-    
-
-    struct position pos = start;
-    queue.emplace(&grid[pos.y][pos.x]);
-
-    struct cell* curCell;
-    while(!queue.empty()) {
-        const struct queueContents qC = queue.top();
-        queue.pop();
-
-        curCell = qC.cell;
-        const int& totalCost = qC.totalCost;
-
-        
-        if(curCell->visited) continue;
-        curCell->visited = true;
-        
-        if(totalCost > maxScore) continue;
-        auto prev = qC.prevCells;
-        prev.push_back(curCell);
-
-        auto neighbours = getValidNeighbours(curCell->position, prev, grid, grid[0].size(), grid.size());
-        for(cell* cell : neighbours) {
-            if(!cell) continue;
-            if(cell->position == dest) {
-                for(size_t y : range(grid.size())) {
-                    for(size_t x : range(grid[0].size())) {
-                        bool found = false;
-                        for(auto c : prev) {
-                            if(c->position.x == x && c->position.y == y) {
-                                printf("#");
-
-                                found = true;
-                                break;
-                            }
-                        }
-
-                        if(!found) printf("%d", grid[y][x].heatLoss);
-                    }
-
-                    printf("\n");
-                }
-
-                return totalCost + cell->heatLoss;
-            }
-
-            queue.emplace(cell, totalCost + cell->heatLoss, prev);
-        }*/
-
     std::priority_queue<queueContents, std::vector<queueContents>, std::greater<queueContents>> queue;
-    int end = maxScore;
+    robin_hood::unordered_flat_map<dijkstra::position, size_t, dijkstra::position_hash> dists;
+    for(size_t y : range(grid.size())) for(size_t x : range(grid[0].size())) dists[{ x, y }] = maxScore;
+    
+    queueContents end = { &grid[dest.y][dest.x], maxScore, {} };
 
     queue.push({ &grid[start.y][start.x], 0, {} });
 
@@ -136,63 +87,60 @@ int dijkstraSearch(struct std::vector<std::vector<dijkstra::cell>>& grid, const 
         queue.pop();
 
         auto newPrev = cur.prevCells;
-        auto newTravelled = cur.travelled;
         newPrev.push_back(cur.cell);
-        newTravelled.emplace(cur.cell->position);
-
-        /*
-        for(size_t y : range(grid.size())) {
-            for(size_t x : range(grid[0].size())) {
-                bool found = false;
-                for(size_t c : range(newPrev.size())) {
-                    auto cur = newPrev[c];
-
-                    if(cur->position.x == x && cur->position.y == y) {
-                        if(c == 0) {
-                            printf("#");
-                            found = true;
-                            continue;
-                        }
-                        
-                        
-                        auto prev = newPrev[c - 1];
-
-                        if(cur->position.x > prev->position.x) printf(">");
-                        else if(cur->position.x < prev->position.x) printf("<");
-                        else if(cur->position.y > prev->position.y) printf("v");
-                        else if(cur->position.y < prev->position.y) printf("^");
-                        else {
-                            printf("#");
-                        }
-
-                        found = true;
-                        break;
-                    }
-                }
-
-                if(!found) printf("%d", grid[y][x].heatLoss);
-            }
-
-            printf("\n");
-        }
-
-        printf("\n\n\n");
-        //*/
+     
         for (cell* cell : getValidNeighbours(cur.cell->position, newPrev, grid, grid[0].size(), grid.size())) {
-            if(cell == nullptr || newTravelled.contains(cell->position)) continue;
-
-            if(cell->position == dest) {
-                end = std::min(end, cur.totalCost + cell->heatLoss);
+            if(cell == nullptr || dists[cell->position] < cur.totalCost + cell->heatLoss) continue;
+               
+            dists[cell->position] = cur.totalCost + cell->heatLoss;
+            if(cell->position == dest && end.totalCost > cur.totalCost + cell->heatLoss) {
+                end = { cell, cur.totalCost + cell->heatLoss, newPrev };
                 continue;
             }
-            
-            newTravelled.emplace(cell->position);
 
-            queue.push({ cell, cur.totalCost + cell->heatLoss, newPrev, newTravelled });
+            queue.push({ cell, cur.totalCost + cell->heatLoss, newPrev });
         }
     }
 
-    return end;
+
+    for(size_t y : range(grid.size())) {
+        for(size_t x : range(grid[0].size())) {
+            bool found = false;
+            for(size_t c : range(end.prevCells.size())) {
+                auto cur = end.prevCells[c];
+
+                if(cur->position.x == x && cur->position.y == y) {
+                    if(c == 0) {
+                        printf("#");
+                        found = true;
+                        continue;
+                    }
+                    
+                    
+                    auto prev = end.prevCells[c - 1];
+
+                    if(cur->position.x > prev->position.x) printf(">");
+                    else if(cur->position.x < prev->position.x) printf("<");
+                    else if(cur->position.y > prev->position.y) printf("v");
+                    else if(cur->position.y < prev->position.y) printf("^");
+                    else {
+                        printf("#");
+                    }
+
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found) printf("%d", grid[y][x].heatLoss);
+        }
+
+        printf("\n");
+    }
+
+    printf("\n\n\n");
+
+    return end.totalCost;
 }
 
 };
