@@ -16,7 +16,6 @@ enum direction {
     NONE
 };
 
-
 struct position {
     size_t x;
     size_t y;
@@ -26,14 +25,11 @@ struct position {
         
     bool operator==(const position& pos) { return x == pos.x && y == pos.y; }
     bool operator==(const position& pos) const { return x == pos.x && y == pos.y; }
-}; 
-
-
-struct position_hash {
+    
     inline std::size_t operator()(const position& c) const {
         return (c.x << 32) + (c.y << 16) + (c.straight << 8) + c.direction;
     }
-};
+}; 
 
 struct cell {
     struct dijkstra::position position;
@@ -52,14 +48,13 @@ std::vector<dijkstra::direction> getDirs(dijkstra::direction dir) {
     }
 }
 
-std::vector<cell> getValidNeighbours(const position& pos, std::vector<std::vector<size_t>>& grid) {
+std::vector<cell> getValidNeighbours(const position& pos, std::vector<std::vector<size_t>>& grid, size_t minStraight, size_t maxStraight) {
     const size_t width = grid[0].size(), height = grid.size();
     std::vector<cell> neighbours;
 
-    const static size_t maxStraight = 3;
-
     for(dijkstra::direction dir : getDirs(pos.direction)) {
-        if(pos.straight >= maxStraight && pos.direction == dir) continue;
+        if(pos.direction == dir && pos.straight >= maxStraight) continue;
+        else if(pos.direction != dijkstra::direction::NONE && pos.direction != dir && pos.straight < minStraight) continue;
 
         switch (dir) {
         case dijkstra::direction::NORTH: {
@@ -93,9 +88,9 @@ std::vector<cell> getValidNeighbours(const position& pos, std::vector<std::vecto
     return neighbours;
 }
 
-int dijkstraSearch(std::vector<std::vector<size_t>>& grid, const struct position& start, const struct position& dest, int maxScore = __INT_MAX__) {
+int dijkstraSearch(std::vector<std::vector<size_t>>& grid, const struct position& start, const struct position& dest, size_t minStraight, size_t maxStraight, int maxScore = __INT_MAX__) {
     std::priority_queue<dijkstra::cell, std::vector<dijkstra::cell>, std::greater<dijkstra::cell>> queue;
-    robin_hood::unordered_flat_set<dijkstra::position, dijkstra::position_hash> visited;
+    robin_hood::unordered_flat_set<dijkstra::position, dijkstra::position> visited;
     
     queue.push({ start, 0 });
         
@@ -104,12 +99,13 @@ int dijkstraSearch(std::vector<std::vector<size_t>>& grid, const struct position
         queue.pop();
 
         if(visited.contains(cur.position)) continue;
-        if(cur.position == dest) return cur.cost;
+        if(cur.position == dest && cur.position.straight >= minStraight) return cur.cost;
         
         visited.emplace(cur.position);
 
-        for (dijkstra::cell& neighbour : getValidNeighbours(cur.position, grid)) {
+        for (dijkstra::cell& neighbour : getValidNeighbours(cur.position, grid, minStraight, maxStraight)) {
             neighbour.cost += cur.cost;
+
             queue.push(neighbour);
         }
     }
@@ -139,13 +135,12 @@ public:
 
     void partA() {
         if(grid.size() <= 0) loadGrid();
-        partASolution = 0;
-
-        partASolution = dijkstra::dijkstraSearch(grid, dijkstra::position { 0, 0, dijkstra::direction::NONE, 1 }, dijkstra::position { grid[0].size() - 1, grid.size() - 1 });
+        partASolution = dijkstra::dijkstraSearch(grid, dijkstra::position { 0, 0, dijkstra::direction::NONE, 1 }, dijkstra::position { grid[0].size() - 1, grid.size() - 1 }, 1, 3);
     }
 
     void partB() {
-        partBSolution = 0;
+        if(grid.size() <= 0) loadGrid();
+        partBSolution = dijkstra::dijkstraSearch(grid, dijkstra::position { 0, 0, dijkstra::direction::NONE, 1 }, dijkstra::position { grid[0].size() - 1, grid.size() - 1 }, 4, 10);
     }
 
     void printSolution(bool partA, bool partB) {
