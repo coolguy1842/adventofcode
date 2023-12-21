@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     case 15: day = (AOC::Day*)new Day15(); break;
     case 16: day = (AOC::Day*)new Day16(); break;
     case 17: day = (AOC::Day*)new Day17(); break;
-    // case 18: day = (AOC::Day*)new Day18(); break;
+    case 18: day = (AOC::Day*)new Day18(); break;
     // case 19: day = (AOC::Day*)new Day19(); break;
     // case 20: day = (AOC::Day*)new Day20(); break;
     // case 21: day = (AOC::Day*)new Day21(); break;
