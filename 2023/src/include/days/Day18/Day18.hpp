@@ -109,49 +109,36 @@ public:
         }
     }
 
-
-    bool inBounds(const std::vector<Coordinates>& bounds, const Coordinates& position) {
-        size_t j = bounds.size() - 1;
-        bool ret = false;
-
-        for(size_t i = 0; i < bounds.size(); i++) {
-            if (position == bounds[i]) return true;
-
-            if ((bounds[i].y > position.y) != (bounds[j].y > position.y)) {
-                long slope = (position.x - bounds[i].x) * (bounds[j].y - bounds[i].y) - (bounds[j].x - bounds[i].x) * (position.y - bounds[i].y);
-
-                if(slope == 0) return true;
-                if((slope < 0) != (bounds[j].y < bounds[i].y)) ret = !ret;
-            }
-
-            j = i;
-        }
-
-        return ret;
-    }
-
     void partA() {
         if(trenches.size() <= 0) loadInputA();
-        partASolution = 0;
+        long long shoelace = 0;
 
-        for(const long long& y : range(minYA, maxYA)) {
-            for(const long long& x : range(minXA, maxXA)) {
-                if(!inBounds(trenches, Coordinates(x, y))) continue;
-                partASolution++;
-            }
+        // Shoelace formula
+        for (int i = 0; i < trenches.size(); i++) {
+            Coordinates cur = trenches[i];
+            Coordinates next = trenches[(i + 1) % trenches.size()];
+
+            shoelace += (cur.y + next.y) * (cur.x - next.x);
         }
+    
+        // Pick's theorem
+        partASolution = std::abs(shoelace / 2) + (trenches.size() / 2) + 1;
     }
 
     void partB() {
         if(trenchesB.size() <= 0) loadInputB();
-        partBSolution = 0;
+        long long shoelace = 0;
+        
+        // Shoelace formula
+        for (size_t i : range(trenchesB.size())) {
+            const Coordinates& cur = trenchesB[i];
+            const Coordinates& next = trenchesB[(i + 1) % trenchesB.size()];
 
-        for(const long long& y : range(minYB, maxYB)) {
-            for(const long long& x : range(minXB, maxXB)) {
-                if(!inBounds(trenchesB, Coordinates(x, y))) continue;
-                partBSolution++;
-            }
+            shoelace += (cur.y + next.y) * (cur.x - next.x);
         }
+    
+        // Pick's theorem
+        partBSolution = std::abs(shoelace / 2) + (trenchesB.size() / 2) + 1;
     }
 
     void printSolution(bool partA, bool partB) {
