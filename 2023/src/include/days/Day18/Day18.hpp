@@ -35,19 +35,11 @@ private:
         TRENCH = '#'
     };
 
-    long long maxXA, maxXB;
-    long long minXA, minXB;
-
-    long long maxYA, maxYB;
-    long long minYA, minYB;
-
     std::vector<Coordinates> trenches;
     std::vector<Coordinates> trenchesB;
 
 public:
     void loadInputA() {
-        minXA = 0, minYA = 0;
-        maxXA = 0, maxYA = 0;
         long long x = 0, y = 0;
 
         trenches.push_back(Coordinates(x, y));
@@ -68,18 +60,10 @@ public:
 
                 trenches.push_back(Coordinates(x, y));
             } while(--toDig);
-
-            minXA = std::min(minXA, x);
-            maxXA = std::max(maxXA, x + 1);
-
-            minYA = std::min(minYA, y);
-            maxYA = std::max(maxYA, y + 1);
         }
     }
    
     void loadInputB() {
-        minXB = 0, minYB = 0;
-        maxXB = 0, maxYB = 0;
         long long x = 0, y = 0;
 
         trenchesB.push_back(Coordinates(x, y));
@@ -100,12 +84,6 @@ public:
 
                 trenchesB.push_back(Coordinates(x, y));
             } while(--toDig);
-
-            minXB = std::min(minXB, x);
-            maxXB = std::max(maxXB, x + 1);
-
-            minYB = std::min(minYB, y);
-            maxYB = std::max(maxYB, y + 1);
         }
     }
 
