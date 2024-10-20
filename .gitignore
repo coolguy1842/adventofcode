@@ -1,8 +1,7 @@
-.vscode
+**/.vscode
+**/.cache
+
 **/build
 
 **/input/*.txt
-**/build.bat
-**/build.sh
-
 **/session-cookie
