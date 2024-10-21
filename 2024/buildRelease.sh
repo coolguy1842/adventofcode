@@ -2,7 +2,7 @@
 
 path=$(realpath $(dirname $PWD/$0))
 day=${1%/}
-dayPath=$path/days/Day$day
+dayPath=$path/days/Day${1%/}
 
 if [ ! -e $dayPath ]; then
     echo Invalid Path
@@ -13,7 +13,7 @@ elif [ ! -e $dayPath/CMakeLists.txt ]; then
 fi
 
 run_cmake() {
-    cmake $path -DCMAKE_BUILD_TYPE=Debug -DDAY=$day
+    cmake $path -DCMAKE_BUILD_TYPE=Release -DDAY=$day
 }
 
 init_build() {

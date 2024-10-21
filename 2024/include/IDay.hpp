@@ -18,7 +18,7 @@ private:
 public:
     Timer timer;
     
-    IDay() : input(Input(readInput(INPUT_PATH))) {}
+    IDay(std::string inputPath) : input(Input(readInput(inputPath))) {}
     virtual ~IDay() = default;
 
     virtual void partA() = 0;

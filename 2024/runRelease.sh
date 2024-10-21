@@ -12,7 +12,7 @@ elif [ ! -e $dayPath/CMakeLists.txt ]; then
     exit
 fi
 
-./build.sh $1
+./buildRelease.sh $1
 buildFile=$path/build/days/Day$day/day
 if [ ! -e $buildFile ]; then
     echo Failed to build

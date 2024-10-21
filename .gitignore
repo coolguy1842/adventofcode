@@ -3,5 +3,7 @@
 
 **/build
 
+**/input.txt
 **/input/*.txt
+
 **/session-cookie

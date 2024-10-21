@@ -1,12 +1,13 @@
 #!/bin/bash
 
 path=$(realpath $(dirname $PWD/$0))
-dayPath=$path/${1%/}
+day=${1%/}
+dayPath=$path/days/Day$day
 
 if [ -e $dayPath ]; then
     echo Path Exists
     exit
 fi
 
-cp -r DayTemplate $dayPath
+cp -r $path/days/DayTemplate $dayPath
 touch $dayPath/input.txt
