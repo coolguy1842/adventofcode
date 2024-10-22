@@ -5,6 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB UTIL_SRC
     "src/*.cpp"
+    "src/**/*.cpp"
 )
 
 list(REMOVE_ITEM UTIL_SRC src/main.cpp)
@@ -32,5 +33,13 @@ file(GLOB DAYS_LIST
 if(${DAYS_PATH}/Day${DAY} IN_LIST DAYS_LIST)
     add_subdirectory(${DAYS_PATH}/Day${DAY})
 else()
-    message(FATAL_ERROR "Day not found")
+    message(WARNING "No day specified, using most recent")
+
+    list(LENGTH DAYS_LIST length)
+    if(length GREATER 0)
+        list(GET DAYS_LIST -1 last_item)
+        add_subdirectory(${last_item})
+    else()
+        message(FATAL_ERROR "Day not found")
+    endif()
 endif()

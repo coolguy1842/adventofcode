@@ -13,7 +13,7 @@ elif [ ! -e $dayPath/CMakeLists.txt ]; then
 fi
 
 run_cmake() {
-    cmake $path -DCMAKE_BUILD_TYPE=Release -DDAY=$day
+    cmake $path -DCMAKE_BUILD_TYPE=Release -DDAY=$day -G Ninja
 }
 
 init_build() {
@@ -36,6 +36,7 @@ dir=$PWD
 cd build
 
 run_cmake
-make -j $(lscpu | grep -E '^CPU\(s\):' | sed -n 's/.*\s\([0-9]*\).*/\1/p')
+# make -j $(lscpu | grep -E '^CPU\(s\):' | sed -n 's/.*\s\([0-9]*\).*/\1/p')
+ninja
 
 cd $dir

@@ -1,7 +1,7 @@
 #ifndef __INPUT_HPP__
 #define __INPUT_HPP__
 
-#include <strutils.hpp>
+#include <utils/StringUtils.hpp>
 
 #include <unordered_map>
 #include <string>

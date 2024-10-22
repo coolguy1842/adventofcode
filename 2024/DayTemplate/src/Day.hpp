@@ -2,7 +2,11 @@
 #define __DAY_HPP__
 
 #include <IDay.hpp>
-#include <spdlog/spdlog.h>
+
+// stop clangd from complaining
+#ifndef INPUT_PATH
+#define INPUT_PATH ""
+#endif
 
 class Day : public AOCUtil::IDay {
 private:

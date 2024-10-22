@@ -9,5 +9,5 @@ if [ -e $dayPath ]; then
     exit
 fi
 
-cp -r $path/days/DayTemplate $dayPath
+cp -r $path/DayTemplate $dayPath
 touch $dayPath/input.txt

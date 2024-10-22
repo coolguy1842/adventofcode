@@ -1,17 +1,20 @@
+#include <cstdio>
+#include <spdlog/spdlog.h>
+#include <utils/StringUtils.hpp>
+
 #include <cstdlib>
 #include <string>
-#include <strutils.hpp>
 
 #include <string.h>
+
 
 std::vector<std::string> AOCUtil::split(std::string str, std::string delim) {
     std::vector<std::string> out;
 
-    const char* strPtr = str.c_str();
     const char* delimPtr = delim.c_str();
 
     char* temp = (char*)malloc(str.size() + 1);
-    strcpy(temp, strPtr);
+    strcpy(temp, str.c_str());
 
     char* res = strtok(temp, delimPtr);
     while(res != nullptr) {
@@ -21,4 +24,17 @@ std::vector<std::string> AOCUtil::split(std::string str, std::string delim) {
 
     free(temp);
     return out;
+}
+
+
+std::string AOCUtil::replace(std::string str, std::string find, std::string replace) {
+    if(find.empty()) return str;
+
+    size_t i = 0;
+    while((i = str.find(find, i)) != std::string::npos) {
+        str.replace(i, find.length(), replace);
+        i += replace.length();
+    }
+
+    return str;
 }
