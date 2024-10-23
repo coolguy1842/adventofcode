@@ -1,3 +1,15 @@
 [submodule "2023/CLI11"]
 	path = 2023/CLI11
 	url = https://github.com/CLIUtils/CLI11.git
+[submodule "2015/thirdparty/tracy"]
+	path = 2015/thirdparty/tracy
+	url = https://github.com/wolfpld/tracy.git
+[submodule "2015/thirdparty/scnlib"]
+	path = 2015/thirdparty/scnlib
+	url = https://github.com/eliaskosunen/scnlib.git
+[submodule "2024/thirdparty/tracy"]
+	path = 2024/thirdparty/tracy
+	url = https://github.com/wolfpld/tracy.git
+[submodule "2024/thirdparty/scnlib"]
+	path = 2024/thirdparty/scnlib
+	url = https://github.com/eliaskosunen/scnlib.git
