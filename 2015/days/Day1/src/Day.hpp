@@ -1,6 +1,8 @@
 #ifndef __DAY_HPP__
 #define __DAY_HPP__
 
+#include <utils/Range.hpp>
+
 #include <IDay.hpp>
 #include <optional>
 #include <spdlog/spdlog.h>
@@ -16,7 +18,7 @@ private:
     std::optional<size_t> basementStart;
 
     void loopFunc(bool partB) {
-        for(size_t i = 0; i < input.text.size(); i++) {
+        for(size_t i : AOCUtil::Range(input.text.size())) {
             switch(input.text[i]) {
             case '(': floor++; break;
             case ')': floor--; break;

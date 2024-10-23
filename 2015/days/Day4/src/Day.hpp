@@ -1,7 +1,9 @@
 #ifndef __DAY_HPP__
 #define __DAY_HPP__
 
-#include "utils/StringUtils.hpp"
+#include <utils/Range.hpp>
+#include <utils/StringUtils.hpp>
+
 #include <IDay.hpp>
 #include <cstdlib>
 #include <stdlib.h>
@@ -23,7 +25,7 @@ private:
     std::optional<size_t> aKeyNumber;
     std::optional<size_t> bKeyNumber;
 
-    size_t partFunc(size_t numZeroes) {
+    size_t partFunc(int numZeroes) {
         size_t strLen = input.text.size();
 
         unsigned char digest[EVP_MAX_MD_SIZE], *byte = digest;
@@ -37,17 +39,18 @@ private:
             byte = digest;
             
             size_t numLen = AOCUtil::numerictostr(i, numPtr);
+            // deprecated but its faster than the EVP_Digest functions so who cares
             MD5((unsigned char*)str, strLen + numLen, digest);
 
             if(numZeroes % 2 == 0) {
-                for(size_t j = 0; j < numZeroes; j += 2) {
+                for(int j : AOCUtil::Range(0, numZeroes, 2)) {
                     if(*byte++) {
                         goto pass;
                     }
                 }
             }
             else {
-                for(size_t j = 0; j < numZeroes; j++) {
+                for(int j : AOCUtil::Range(numZeroes)) {
                     if((j % 2 == 0 ? *byte >> 4 : *byte++) & 0x0F) {
                         goto pass;
                     }

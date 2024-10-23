@@ -20,4 +20,4 @@ if [ ! -e $buildFile ]; then
 fi
 
 # run with sudo for better tracy profiling
-$buildFile ${@:2}
+sudo $buildFile ${@:2}

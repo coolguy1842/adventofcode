@@ -2,6 +2,7 @@
 #define __STRING_UTILS_HPP__
 
 #include <cmath>
+#include <optional>
 #include <spdlog/spdlog.h>
 #include <type_traits>
 
@@ -15,12 +16,37 @@ std::string replace(std::string str, std::string find, std::string replace);
 
 // templates dont like being in source files
 template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
+std::optional<T> strtonumeric(const char* str, bool failOnNonDigit) {
+    bool negative = *str == '-';
+    T out = 0;
+
+    if(negative) str++;
+    while(*str) {
+        switch(*str) {
+        case '0' ... '9': break;
+        default:
+            if(failOnNonDigit) return std::nullopt;
+            return out;
+        }
+        
+        out = out * 10 + (*str++ - '0');
+    }
+    
+    return negative ? -out : out;
+}
+
+template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 T strtonumeric(const char* str) {
     bool negative = *str == '-';
     T out = 0;
 
     if(negative) str++;
     while(*str) {
+        switch(*str) {
+        case '0' ... '9': break;
+        default: return out;
+        }
+        
         out = out * 10 + (*str++ - '0');
     }
     

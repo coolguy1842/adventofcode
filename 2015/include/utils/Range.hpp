@@ -1,8 +1,10 @@
 #ifndef __RANGE_HPP__
 #define __RANGE_HPP__
 
+namespace AOCUtil {
+
 template<typename T, typename U = T, typename V = T>
-class range {
+class Range {
 private:
     using value_type = decltype(T() + U() + V());
 
@@ -24,11 +26,13 @@ public:
         bool operator!=(const iter& other) { return _pos * _step < other._pos * _step; }
     };
 
-    range(T from, U to, V step = 1) : _from{from}, _to{to}, _step{step} {}
-    range(T to) : range{T(), to} {}
+    Range(T from, U to, V step = 1) : _from{from}, _to{to}, _step{step} {}
+    Range(T to) : Range{T(), to} {}
 
     iter begin() { return iter(_from, _step); }
     iter end() { return iter(_to, _step); }
+};
+
 };
 
 #endif

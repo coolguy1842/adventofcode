@@ -1,6 +1,8 @@
 #ifndef __DAY_HPP__
 #define __DAY_HPP__
 
+#include <utils/Range.hpp>
+
 #include <glm/ext/vector_int2.hpp>
 #include <spdlog/spdlog.h>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -26,7 +28,7 @@ private:
         glm::ivec2 position(0), roboPosition(0);
 
         positions.emplace(position);
-        for(size_t i = 0; i < input.text.size(); i++) {
+        for(size_t i : AOCUtil::Range(input.text.size())) {
             bool human = !partB || i % 2 == 0;
             switch(input.text[i]) {
             case '>': (human ? position.x : roboPosition.x)++; break;
