@@ -19,6 +19,7 @@ target_include_directories(aoc PUBLIC include)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
+include(FetchContent)
 
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall -pipe -g3 -DDEBUG")
 set(CMAKE_C_FLAGS_DEBUG_INIT "-Wall -pipe -g3 -DDEBUG")
