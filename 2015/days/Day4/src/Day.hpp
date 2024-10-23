@@ -23,39 +23,39 @@ private:
     std::optional<size_t> aKeyNumber;
     std::optional<size_t> bKeyNumber;
 
-    void MD5Hash(const char* str, char* out) {
-        unsigned char digest[EVP_MAX_MD_SIZE];
-
-        // deprecated but runs faster
-        MD5_CTX ctx;
-        MD5_Init(&ctx);
-        MD5_Update(&ctx, str, strlen(str));
-        MD5_Final(digest, &ctx);
-
-        const char* hexDigits = "0123456789ABCDEF";
-        for(size_t i = 0, j = 0; i < 3; i++) {
-            out[j++] = hexDigits[(digest[i] >> 4) & 0x0F];
-            out[j++] = hexDigits[digest[i] & 0xF];
-        }
-    }
-
     size_t partFunc(size_t numZeroes) {
-        char str[64], hex[7];
+        size_t strLen = input.text.size();
+
+        unsigned char digest[EVP_MAX_MD_SIZE], *byte = digest;
+        char str[64];
+
         memset(str, '\0', sizeof(str));
         strcpy(str, input.text.c_str());
 
-        char resStr[numZeroes];
-        memset(resStr, '0', numZeroes);
-
-        char* numPtr = str + input.text.size();
+        char* numPtr = str + strLen;
         for(size_t i = 0; ; i++) {
-            AOCUtil::numerictostr(i, numPtr);
-            MD5Hash(str, hex);
+            byte = digest;
+            
+            size_t numLen = AOCUtil::numerictostr(i, numPtr);
+            MD5((unsigned char*)str, strLen + numLen, digest);
 
-            hex[numZeroes] = '\0';
-            if(strcmp(hex, resStr) == 0) {
-                return i;
+            if(numZeroes % 2 == 0) {
+                for(size_t j = 0; j < numZeroes; j += 2) {
+                    if(*byte++) {
+                        goto pass;
+                    }
+                }
             }
+            else {
+                for(size_t j = 0; j < numZeroes; j++) {
+                    if((j % 2 == 0 ? *byte >> 4 : *byte++) & 0x0F) {
+                        goto pass;
+                    }
+                }
+            }
+
+            return i;
+            pass:
         }
     }
 

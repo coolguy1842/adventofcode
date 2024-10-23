@@ -19,4 +19,5 @@ if [ ! -e $buildFile ]; then
     exit
 fi
 
-$buildFile ${@:2}
+# run with sudo for better tracy profiling
+sudo $buildFile ${@:2}
