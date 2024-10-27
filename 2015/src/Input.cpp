@@ -1,4 +1,7 @@
+#include "utils/StringUtils.hpp"
 #include <Input.hpp>
+#include <string>
+#include <vector>
 
 void AOCUtil::Input::clearCaches() {
     this->splitCaches = {};
@@ -10,6 +13,7 @@ std::vector<std::string>& AOCUtil::Input::getSplitText(std::string delim) {
         return it->second;
     }
 
-    this->splitCaches[delim] = split(this->text, delim);
-    return this->splitCaches[delim];
+    std::vector<std::string>& out = this->splitCaches[delim];
+    out = split(this->text, delim);
+    return out;
 }

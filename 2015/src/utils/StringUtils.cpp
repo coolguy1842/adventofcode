@@ -13,8 +13,8 @@ std::vector<std::string> AOCUtil::split(std::string str, std::string delim) {
 
     const char* delimPtr = delim.c_str();
 
-    char* temp = (char*)malloc(str.size() + 1);
-    strcpy(temp, str.c_str());
+    char temp[str.size() + 1];
+    memcpy(temp, str.c_str(), str.size());
 
     char* res = strtok(temp, delimPtr);
     while(res != nullptr) {
@@ -22,7 +22,6 @@ std::vector<std::string> AOCUtil::split(std::string str, std::string delim) {
         res = strtok(nullptr, delimPtr);
     }
 
-    free(temp);
     return out;
 }
 
