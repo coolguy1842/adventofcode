@@ -6,7 +6,7 @@ find_package(CLI11 REQUIRED)
 find_package(glm REQUIRED)
 
 include_directories(src)
-add_executable(day ../../main.cpp)
+add_executable(day ${PROJECT_SOURCE_DIR}/main.cpp)
 
 target_link_libraries(day PRIVATE $<$<BOOL:${MINGW}>:ws2_32> aoc glm CLI11::CLI11 pthread $<$<BOOL:${MINGW}>:tbb12>)
 set_property(TARGET day PROPERTY CXX_STANDARD 23)

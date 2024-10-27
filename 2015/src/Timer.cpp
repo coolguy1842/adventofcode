@@ -1,5 +1,9 @@
+#include "utils/Range.hpp"
 #include <Timer.hpp>
+#include <algorithm>
+#include <chrono>
 #include <optional>
+#include <spdlog/spdlog.h>
 
 using duration = std::chrono::nanoseconds;
 using time_point = std::chrono::time_point<std::chrono::high_resolution_clock, duration>;
@@ -11,7 +15,7 @@ void AOCUtil::Timer::start() {
 
 std::optional<duration> AOCUtil::Timer::stop() {
     if(!_start.has_value()) {
-        return this->get_time();
+        return std::nullopt;
     }
 
     _stop = std::chrono::high_resolution_clock::now();
@@ -69,6 +73,11 @@ void AOCUtil::Timer::print(DurationLevel level) {
 
 
 
+void AOCUtil::AccumulatingTimer::reset() {
+    _start = std::nullopt;
+    _lastStop = std::nullopt;
+    _currentTime = std::nullopt;
+}
 
 void AOCUtil::AccumulatingTimer::start() {
     _start = std::chrono::high_resolution_clock::now();
@@ -76,7 +85,7 @@ void AOCUtil::AccumulatingTimer::start() {
 
 std::optional<duration> AOCUtil::AccumulatingTimer::stop() {
     if(!_start.has_value()) {
-        return this->get_time();
+        return std::nullopt;
     }
 
     _lastStop = std::chrono::high_resolution_clock::now();
@@ -91,18 +100,53 @@ std::optional<duration> AOCUtil::AccumulatingTimer::stop() {
     return this->get_time();
 }
 
-void AOCUtil::AccumulatingTimer::reset() {
-    _start = std::nullopt;
-    _lastStop = std::nullopt;
-    _currentTime = std::nullopt;
-}
-
-
-
 std::optional<duration> AOCUtil::AccumulatingTimer::get_time() {
     if(!_start.has_value() || !_currentTime.has_value()) {
         return std::nullopt;
     }
 
     return _currentTime.value();
+}
+
+
+
+void AOCUtil::MeanTimer::reset() {
+    _start = {};
+    _stop = {};
+    
+}
+
+void AOCUtil::MeanTimer::start() {
+    if(_start.size() > _stop.size()) {
+        return;
+    }
+
+    _start.push_back(std::chrono::high_resolution_clock::now());
+}
+
+std::optional<duration> AOCUtil::MeanTimer::stop() {
+    if(_start.size() <= _stop.size()) {
+        return std::nullopt;
+    }
+
+    _stop.push_back(std::chrono::high_resolution_clock::now());
+
+    return this->get_time();
+}
+
+std::optional<duration> AOCUtil::MeanTimer::get_time() {
+    if(_start.size() == 0 || _stop.size() == 0) {
+        return std::nullopt;
+    }
+
+    time_point point = std::chrono::high_resolution_clock::now();
+
+    duration dur(0);
+    size_t count = std::min(_start.size(), _stop.size());
+    for(size_t i : Range(count)) {
+        dur += (std::chrono::time_point_cast<std::chrono::nanoseconds>(_stop[i]) - std::chrono::time_point_cast<duration>(_start[i]));
+    }
+
+    dur /= count;
+    return dur;
 }

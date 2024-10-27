@@ -5,7 +5,7 @@ add_compile_definitions(INPUT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/input.txt")
 find_package(CLI11 REQUIRED)
 
 include_directories(src)
-add_executable(day ../../main.cpp)
+add_executable(day ${PROJECT_SOURCE_DIR}/main.cpp)
 
 target_link_libraries(day PRIVATE $<$<BOOL:${MINGW}>:ws2_32> aoc CLI11::CLI11 ssl crypto pthread $<$<BOOL:${MINGW}>:tbb12>)
 set_property(TARGET day PROPERTY CXX_STANDARD 23)

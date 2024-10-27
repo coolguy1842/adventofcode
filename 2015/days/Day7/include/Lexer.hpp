@@ -1,7 +1,7 @@
 #ifndef __LEXER_HPP__
 #define __LEXER_HPP__
 
-#include <includes.hpp>
+#include <Includes.hpp>
 
 #include <cctype>
 #include <utils/StringUtils.hpp>

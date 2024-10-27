@@ -51,14 +51,31 @@ public:
     AccumulatingTimer() : Timer("") {}
     AccumulatingTimer(std::string name) : Timer(name) {}
 
+    void reset();
     void start();
     std::optional<duration> stop();
-
-    void reset();
 
     std::optional<duration> get_time();
 };
 
+class MeanTimer : public Timer {
+private:
+    using duration = std::chrono::nanoseconds;
+    using time_point = std::chrono::time_point<std::chrono::high_resolution_clock, duration>;
+    
+    std::vector<time_point> _start;
+    std::vector<time_point> _stop;
+
+public:
+    MeanTimer() : Timer("") {}
+    MeanTimer(std::string name) : Timer(name) {}
+
+    void reset();
+    void start();
+    std::optional<duration> stop();
+
+    std::optional<duration> get_time();
+};
 };
 
 #endif

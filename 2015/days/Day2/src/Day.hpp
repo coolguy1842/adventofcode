@@ -61,7 +61,7 @@ public:
 
     void printResults(bool partA, bool partB) {
         if(partA) spdlog::info("Part A: {}", paperAmount);
-        if(partA) spdlog::info("Part B: {}", ribbonAmount);
+        if(partB) spdlog::info("Part B: {}", ribbonAmount);
     }
 };
 
