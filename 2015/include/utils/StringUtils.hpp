@@ -55,15 +55,17 @@ T strtonumeric(const char* str) {
 
 template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 int numerictostr(T number, char* out) {
-    int numLen = std::max(0, (int)std::log10(number));
+    if(number <= 9) {
+        *out = number + '0';
+        *(out + 1) = '\0';
 
-    size_t i = 0;
-    do {
-        out[numLen - i++] = (number % 10) + '0';
-    } while((number /= 10));
+        return 1;
+    }
 
-    out[numLen + 1] = '\0';
-    return numLen + 1;
+    auto result = std::to_chars(out, out + 32, number);
+    
+    *result.ptr = '\0';
+    return result.ptr - out;
 }
 
 };
