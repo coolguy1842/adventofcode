@@ -14,11 +14,12 @@ void AOCUtil::Timer::start() {
 }
 
 std::optional<duration> AOCUtil::Timer::stop() {
+    time_point stopTime = std::chrono::high_resolution_clock::now();
     if(!_start.has_value()) {
         return std::nullopt;
     }
 
-    _stop = std::chrono::high_resolution_clock::now();
+    _stop = stopTime;
     return this->get_time();
 }
 
@@ -84,11 +85,12 @@ void AOCUtil::AccumulatingTimer::start() {
 }
 
 std::optional<duration> AOCUtil::AccumulatingTimer::stop() {
+    time_point stopTime = std::chrono::high_resolution_clock::now();
     if(!_start.has_value()) {
         return std::nullopt;
     }
 
-    _lastStop = std::chrono::high_resolution_clock::now();
+    _lastStop = stopTime;
 
     if(!_currentTime.has_value()) {
         _currentTime = std::chrono::duration_cast<duration>(_lastStop.value() - this->_start.value());
@@ -125,11 +127,12 @@ void AOCUtil::MeanTimer::start() {
 }
 
 std::optional<duration> AOCUtil::MeanTimer::stop() {
+    time_point stopTime = std::chrono::high_resolution_clock::now();
     if(_start.size() <= _stop.size()) {
         return std::nullopt;
     }
 
-    _stop.push_back(std::chrono::high_resolution_clock::now());
+    _stop.push_back(stopTime);
 
     return this->get_time();
 }

@@ -21,8 +21,8 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 include(FetchContent)
 
-set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall -pipe -g3 -DDEBUG")
-set(CMAKE_C_FLAGS_DEBUG_INIT "-Wall -pipe -g3 -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall -pipe -g3 -O0 -DDEBUG")
+set(CMAKE_C_FLAGS_DEBUG_INIT "-Wall -pipe -g3 -O0 -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math -O3 -Wall -pipe -march=native")
 set(CMAKE_C_FLAGS_RELEASE_INIT "-ffast-math -O3 -Wall -pipe -march=native")
 
