@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.5.0)
 project(aoc VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(JSON_Install OFF CACHE INTERNAL "")
 
 file(GLOB UTIL_SRC
     "src/*.cpp"
@@ -12,8 +11,8 @@ file(GLOB UTIL_SRC
 list(REMOVE_ITEM UTIL_SRC src/main.cpp)
 
 add_subdirectory(thirdparty/scnlib)
-add_subdirectory(thirdparty/json)
 find_package(spdlog REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 add_library(aoc SHARED ${UTIL_SRC})
 target_include_directories(aoc PUBLIC include)

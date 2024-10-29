@@ -170,6 +170,13 @@ public:
         return data;
     }
 
+    void clear() {
+        this->_start = nullptr;
+        this->_end = nullptr;
+
+        this->_size = 0;
+    }
+
     size_t size() { return _size; }
     T& operator[](size_t idx) {
         return this->getAt(idx)->data;
