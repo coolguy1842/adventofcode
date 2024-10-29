@@ -13,15 +13,12 @@ std::vector<std::string> AOCUtil::split(std::string str, std::string delim) {
 
     const char* delimPtr = delim.c_str();
 
-    char temp[str.size() + 1];
-    memcpy(temp, str.c_str(), str.size());
-
-    char* res = strtok(temp, delimPtr);
-    while(res != nullptr) {
-        out.push_back(std::string(res));
-        res = strtok(nullptr, delimPtr);
+    char* copy = strdup(str.c_str()), *token;
+    while((token = strsep(&copy, delimPtr)) != NULL) {
+        out.push_back(std::string(token));
     }
 
+    free(copy);
     return out;
 }
 

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5.0)
 project(aoc VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(JSON_Install OFF CACHE INTERNAL "")
 
 file(GLOB UTIL_SRC
     "src/*.cpp"
@@ -11,6 +12,7 @@ file(GLOB UTIL_SRC
 list(REMOVE_ITEM UTIL_SRC src/main.cpp)
 
 add_subdirectory(thirdparty/scnlib)
+add_subdirectory(thirdparty/json)
 find_package(spdlog REQUIRED)
 
 add_library(aoc SHARED ${UTIL_SRC})
@@ -34,7 +36,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(TracyClient PUBLIC TRACY_ENABLE=1)
 endif()
 
-target_link_libraries(aoc PUBLIC scn::scn spdlog::spdlog TracyClient)
+target_link_libraries(aoc PUBLIC scn::scn spdlog::spdlog nlohmann_json::nlohmann_json TracyClient)
 target_link_libraries(aoc PRIVATE $<$<BOOL:${MINGW}>:ws2_32> pthread $<$<BOOL:${MINGW}>:tbb12>)
 set_property(TARGET aoc PROPERTY CXX_STANDARD 23)
 
