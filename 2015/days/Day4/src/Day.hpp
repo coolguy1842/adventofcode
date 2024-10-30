@@ -23,72 +23,54 @@
 
 class Day : public AOCUtil::IDay {
 private:
+    typedef bool(*checkFunc)(unsigned char*);
+
     std::optional<size_t> aKeyNumber;
     std::optional<size_t> bKeyNumber;
 
-    void incrementStrNumber(char* numStr, size_t& numLen) {
+    void incrementStrNumber(unsigned char* numStr, size_t& numLen) {
         for(size_t i = numLen - 1; i >= 0; i--) {
-            char& digit = ++numStr[i];
+            unsigned char& digit = numStr[i];
             
             switch(digit) {
-            case '9' + 1:
-                if(i == 0) {
-                    // move all digits back
-                    digit = '1';
-                    numStr[i += 2] = '0';
-
-                    for(; i < numLen - 1; i += 2) {
-                        std::swap(numStr[i], numStr[i + 1]);
-                    }
-
-                    numStr[numLen++] = '0';
-                    return;
+            case '9':
+                digit = '0';
+                if(i != 0) {
+                    goto pass;
                 }
 
-                digit = '0';
-                break;
-            default: return;
+                *(numStr + 1) = '0';
+                *(numStr + numLen++) = '0';
+            default: digit++; return;
             }
+
+            pass:
         }
     }
 
-    size_t partFunc(int numZeroes) {
-        size_t strLen = input.text.size();
+    inline static bool checkDigestA(unsigned char* digest) { return !(digest[0] || digest[1] || digest[2] & 0xF0);}
+    inline static bool checkDigestB(unsigned char* digest) { return !(digest[0] || digest[1] || digest[2]); }
 
-        unsigned char digest[EVP_MAX_MD_SIZE], str[64], *byte = digest;
-        memcpy(str, input.text.c_str(), input.text.size());
-        memset(str + input.text.size(), '\0', sizeof(str) - input.text.size());
-
-        char* numPtr = (char*)str + strLen;
-        *numPtr = '0' - 1;
+    size_t partFunc(const bool& partB = false) {
+        #define STR_LEN 64
+        #define HASHED_LEN 16
         
-        size_t numLen = 1;
-        for(size_t i = 0; ; i++) {
-            byte = digest;
-            
-            incrementStrNumber(numPtr, numLen);
+        const size_t& strLen = input.text.size();
+        const checkFunc& func = partB ? checkDigestB : checkDigestA;
 
-            // deprecated but its faster than the EVP_Digest functions so who cares
+        unsigned char *str = (unsigned char*)malloc(STR_LEN), *numPtr = str + strLen, *digest = str + (STR_LEN - HASHED_LEN);
+        memcpy(str, input.text.c_str(), strLen);
+
+        *numPtr = '0';
+
+        for(size_t i = 0, numLen = 1; ; i++) {
             MD5(str, strLen + numLen, digest);
-
-            if(numZeroes % 2 == 0) {
-                for(int j = 0; j < numZeroes; j += 2) {
-                    if(*byte++) {
-                        goto pass;
-                    }
-                }
-            }
-            else {
-                bool leastSignificant = false;
-                for(int j = 0; j < numZeroes; j++, leastSignificant = !leastSignificant) {
-                    if((leastSignificant ? *byte++ : *byte >> 4) & 0x0F) {
-                        goto pass;
-                    }
-                }
+            if(func(digest)) {
+                free(str);
+                return i;
             }
 
-            return i;
-            pass:
+            incrementStrNumber(numPtr, numLen);
         }
     }
 
@@ -96,11 +78,11 @@ public:
     Day() : AOCUtil::IDay(INPUT_PATH), aKeyNumber(std::nullopt), bKeyNumber(std::nullopt) {}
 
     void partA() {
-        aKeyNumber = partFunc(5);
+        aKeyNumber = partFunc();
     }
     
     void partB() {
-        bKeyNumber = partFunc(6);
+        bKeyNumber = partFunc(true);
     }
     
 
