@@ -12,12 +12,12 @@ elif [ ! -e $dayPath/CMakeLists.txt ]; then
     exit
 fi
 
-./build.sh $1
+./buildRelease.sh $1
 buildFile=$path/build/days/Day$day/day
 if [ ! -e $buildFile ]; then
     echo Failed to build
     exit
 fi
 
-# run with sudo for better tracy profiling
-sudo $buildFile ${@:2}
+perf record -a -g $buildFile ${@:2}
+perf report --sort comm,dso

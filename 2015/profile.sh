@@ -19,4 +19,5 @@ if [ ! -e $buildFile ]; then
     exit
 fi
 
-$buildFile ${@:2}
+perf record -a -g $buildFile ${@:2}
+perf report --sort comm,dso

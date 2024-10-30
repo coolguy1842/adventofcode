@@ -7,3 +7,5 @@
 **/input/*.txt
 
 **/session-cookie
+
+**/perf.data*

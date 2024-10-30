@@ -1,6 +1,7 @@
 #ifndef __DAY_HPP__
 #define __DAY_HPP__
 
+#include <cmath>
 #include <utils/Range.hpp>
 #include <utils/StringUtils.hpp>
 
@@ -25,33 +26,62 @@ private:
     std::optional<size_t> aKeyNumber;
     std::optional<size_t> bKeyNumber;
 
+    void incrementStrNumber(char* numStr, size_t& numLen) {
+        for(size_t i = numLen - 1; i >= 0; i--) {
+            char& digit = ++numStr[i];
+            
+            switch(digit) {
+            case '9' + 1:
+                if(i == 0) {
+                    // move all digits back
+                    digit = '1';
+                    numStr[i += 2] = '0';
+
+                    for(; i < numLen - 1; i += 2) {
+                        std::swap(numStr[i], numStr[i + 1]);
+                    }
+
+                    numStr[numLen++] = '0';
+                    return;
+                }
+
+                digit = '0';
+                break;
+            default: return;
+            }
+        }
+    }
+
     size_t partFunc(int numZeroes) {
         size_t strLen = input.text.size();
 
-        unsigned char digest[EVP_MAX_MD_SIZE], *byte = digest;
-        char str[64];
+        unsigned char digest[EVP_MAX_MD_SIZE], str[64], *byte = digest;
+        memcpy(str, input.text.c_str(), input.text.size());
+        memset(str + input.text.size(), '\0', sizeof(str) - input.text.size());
 
-        memset(str, '\0', sizeof(str));
-        strcpy(str, input.text.c_str());
-
-        char* numPtr = str + strLen;
+        char* numPtr = (char*)str + strLen;
+        *numPtr = '0' - 1;
+        
+        size_t numLen = 1;
         for(size_t i = 0; ; i++) {
             byte = digest;
             
-            size_t numLen = AOCUtil::numerictostr(i, numPtr);
+            incrementStrNumber(numPtr, numLen);
+
             // deprecated but its faster than the EVP_Digest functions so who cares
-            MD5((unsigned char*)str, strLen + numLen, digest);
+            MD5(str, strLen + numLen, digest);
 
             if(numZeroes % 2 == 0) {
-                for(int j : AOCUtil::Range(0, numZeroes, 2)) {
+                for(int j = 0; j < numZeroes; j += 2) {
                     if(*byte++) {
                         goto pass;
                     }
                 }
             }
             else {
-                for(int j : AOCUtil::Range(numZeroes)) {
-                    if((j % 2 == 0 ? *byte >> 4 : *byte++) & 0x0F) {
+                bool leastSignificant = false;
+                for(int j = 0; j < numZeroes; j++, leastSignificant = !leastSignificant) {
+                    if((leastSignificant ? *byte++ : *byte >> 4) & 0x0F) {
                         goto pass;
                     }
                 }
