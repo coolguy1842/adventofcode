@@ -39,8 +39,8 @@ private:
                     goto pass;
                 }
 
-                *(numStr + 1) = '0';
-                *(numStr + numLen++) = '0';
+                numStr[1] = '0';
+                numStr[numLen++] = '0';
             default: digit++; return;
             }
 
