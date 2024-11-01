@@ -3,6 +3,7 @@
 
 #include <IDay.hpp>
 
+#include <cstddef>
 #include <glm/ext/vector_int2.hpp>
 #include <glm/glm.hpp>
 #include <cstring>
@@ -18,52 +19,38 @@ class Day : public AOCUtil::IDay {
 private:
     size_t aLightsOn, bLightsOn;
 
-    static glm::ivec2 indexToCoords(const size_t& index, const size_t& width) {
-        return glm::ivec2(index % width, index / width);
-    }
-
-    static size_t coordsToIndex(const size_t& x, const size_t& y, const size_t& width) {
-        return (y * width) + x;
-    }
-
-
-    static void printLights(bool* lights, const size_t& width, const size_t& height) {
-        for(size_t y = 0; y < height; y++) {
-            for(size_t x = 0; x < width; x++) {
-                printf("%c", lights[(y * width) + x] ? '#' : '.');
-            }
-            
-            printf("\n");
-        }
-    }
-
     size_t getNeighbours(bool* lights, const size_t& lightIndex, const size_t& width, const size_t& height, const bool& partB) {
-        glm::ivec2 coords = indexToCoords(lightIndex, width);
+        size_t indexRow = lightIndex / width;
 
         size_t neighbours = 0;
-        for(size_t i = 0; i < 9; i++) {
-            glm::ivec2 neighbourCoords;
+        for(long long y = -1; y <= 1; y++) {
+            for(long long x = -1; x <= 1; x++) {
+                if(x == 0 && y == 0) {
+                    continue;
+                }
 
-            neighbourCoords.x = coords.x + ((i % 3) - 1);
-            if(neighbourCoords.x < 0 || neighbourCoords.x >= width) {
-                continue;
-            }
+                if(indexRow != (lightIndex + x) / width) {
+                    continue;
+                }
+                
+                size_t neighbourIndex = lightIndex + x + (y * height);
+                // if it goes negative it will be > as unsigned so only need one case
+                if(neighbourIndex >= width * height) {
+                    continue;
+                }
+                
+                if(partB && (
+                    neighbourIndex == 0 ||
+                    neighbourIndex == width - 1 ||
+                    neighbourIndex == (width * height) - width ||
+                    neighbourIndex == (width * height) - 1
+                )) {
+                    neighbours++;
+                    continue;
+                }
 
-            neighbourCoords.y = coords.y + ((i / 3) - 1);
-            if(neighbourCoords.y < 0 || neighbourCoords.y >= height) {
-                continue;
+                neighbours += lights[neighbourIndex];
             }
-
-            if(neighbourCoords.x == coords.x && neighbourCoords.y == coords.y) {
-                continue;
-            }
-            else if(partB && ((neighbourCoords.x == 0 || neighbourCoords.x == width - 1) && (neighbourCoords.y == 0 || neighbourCoords.y == height - 1))) {
-                neighbours++;
-                continue;
-            }
-
-            size_t neighbourIndex = coordsToIndex(neighbourCoords.x, neighbourCoords.y, width);
-            neighbours += lights[neighbourIndex];
         }
 
         return neighbours;
@@ -76,30 +63,24 @@ private:
         for(size_t i = 0; i < width * height; i++) {
             size_t neighbours = getNeighbours(lights, i, width, height, partB);
             
-            if(lights[i]) {
-                newState[i] = neighbours == 2 || neighbours == 3;
-            }
-            else {
-                newState[i] = neighbours == 3;
-            }
+            newState[i] = (lights[i] && neighbours == 2) || neighbours == 3;
         }
 
         memcpy(lights, newState, sizeof(newState));
     }
 
 
-    void getDimensions(size_t& width, size_t& height) {
+    // guaranteed to be a square
+    size_t getDimensions() {
         const std::string& str = input.text;
 
-        width = 0, height = 1;
         for(size_t i = 0; i < str.size(); i++) {
-            switch(str[i]) {
-            case '\n':
-                if(width == 0) width = i;
-                height++;
-            default: break;
+            if(str[i] == '\n') {
+                return i;
             }
         }
+
+        return str.size();
     }
 
     void initLights(bool* lights, const size_t& width, const size_t& height) {
@@ -108,8 +89,8 @@ private:
         size_t x = 0, y = 0;
         for(size_t i = 0; i < str.size(); i++) {
             switch(str[i]) {
-            case '.': lights[coordsToIndex(x++, y, width)] = false; break;
-            case '#': lights[coordsToIndex(x++, y, width)] = true; break;
+            case '.': lights[(y * width) + x++] = false; break;
+            case '#': lights[(y * width) + x++] = true; break;
             case '\n': x = 0; y++; break;
             default: break;
             }
@@ -123,7 +104,7 @@ public:
         const std::string str = input.text;
 
         size_t width, height;
-        getDimensions(width, height);
+        width = height = getDimensions();
 
         bool lights[width * height];
         initLights(lights, width, height);
@@ -141,7 +122,7 @@ public:
         const std::string str = input.text;
 
         size_t width, height;
-        getDimensions(width, height);
+        width = height = getDimensions();
 
         bool lights[width * height];
         initLights(lights, width, height);
