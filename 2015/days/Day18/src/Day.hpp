@@ -19,31 +19,26 @@ class Day : public AOCUtil::IDay {
 private:
     size_t aLightsOn, bLightsOn;
 
-    size_t getNeighbours(bool* lights, const size_t& lightIndex, const size_t& width, const size_t& height, const bool& partB) {
-        size_t indexRow = lightIndex / width;
-
-        size_t neighbours = 0;
-        for(long long y = -1; y <= 1; y++) {
+    size_t getNeighbours(bool* lights, const size_t& lightIndex, const size_t& resolution, const size_t& arraySize, const bool& partB) {
+        size_t indexRow = lightIndex / resolution, neighbours = 0;
+        for(long long y = -resolution; y <= (long long)resolution; y += resolution) {
             for(long long x = -1; x <= 1; x++) {
-                if(x == 0 && y == 0) {
-                    continue;
-                }
-
-                if(indexRow != (lightIndex + x) / width) {
+                // if the neighbours x is not on the same row then continue
+                if((!x && !y) || (indexRow != (lightIndex + x) / resolution)) {
                     continue;
                 }
                 
-                size_t neighbourIndex = lightIndex + x + (y * height);
+                size_t neighbourIndex = lightIndex + x + y;
                 // if it goes negative it will be > as unsigned so only need one case
-                if(neighbourIndex >= width * height) {
+                if(neighbourIndex >= arraySize) {
                     continue;
                 }
                 
                 if(partB && (
                     neighbourIndex == 0 ||
-                    neighbourIndex == width - 1 ||
-                    neighbourIndex == (width * height) - width ||
-                    neighbourIndex == (width * height) - 1
+                    neighbourIndex == resolution - 1 ||
+                    neighbourIndex == arraySize - resolution ||
+                    neighbourIndex == arraySize - 1
                 )) {
                     neighbours++;
                     continue;
@@ -56,42 +51,34 @@ private:
         return neighbours;
     }
 
-    void runCycle(bool* lights, const size_t& width, const size_t& height, const bool& partB = false) {
-        bool newState[width * height];
-        memset(newState, false, width * height);
-
-        for(size_t i = 0; i < width * height; i++) {
-            size_t neighbours = getNeighbours(lights, i, width, height, partB);
+    void runCycle(bool* lights, const size_t& resolution, const size_t& arraySize, const bool& partB = false) {
+        bool newState[arraySize];
+        for(size_t i = 0; i < arraySize; i++) {
+            size_t neighbours = getNeighbours(lights, i, resolution, arraySize, partB);
             
-            newState[i] = (lights[i] && neighbours == 2) || neighbours == 3;
+            newState[i] = neighbours == 3 || (lights[i] && neighbours == 2);
         }
 
         memcpy(lights, newState, sizeof(newState));
     }
 
 
-    // guaranteed to be a square
+    // guaranteed to be a square so only need to get one resolution
     size_t getDimensions() {
-        const std::string& str = input.text;
+        const char* strStart = input.text.c_str(), *cur = strStart;
 
-        for(size_t i = 0; i < str.size(); i++) {
-            if(str[i] == '\n') {
-                return i;
-            }
-        }
-
-        return str.size();
+        while(*cur++ != '\n');
+        return (cur - 1) - strStart;
     }
 
-    void initLights(bool* lights, const size_t& width, const size_t& height) {
-        const std::string& str = input.text;
+    void initLights(bool* lights) {
+        const char* str = input.text.c_str();
 
-        size_t x = 0, y = 0;
-        for(size_t i = 0; i < str.size(); i++) {
-            switch(str[i]) {
-            case '.': lights[(y * width) + x++] = false; break;
-            case '#': lights[(y * width) + x++] = true; break;
-            case '\n': x = 0; y++; break;
+        while(true) {
+            switch(*str++) {
+            case '.': *lights++ = false; break;
+            case '#': *lights++ = true; break;
+            case '\0': return;
             default: break;
             }
         }
@@ -101,43 +88,37 @@ public:
     Day() : AOCUtil::IDay(INPUT_PATH), aLightsOn(0), bLightsOn(0) {}
 
     void partA() {
-        const std::string str = input.text;
-
-        size_t width, height;
-        width = height = getDimensions();
-
-        bool lights[width * height];
-        initLights(lights, width, height);
+        size_t resolution = getDimensions(), arraySize = resolution * resolution;
+        bool lights[arraySize];
+        
+        initLights(lights);
 
         for(size_t i = 0; i < 100; i++) {
-            runCycle(lights, width, height);
+            runCycle(lights, resolution, arraySize);
         }
 
-        for(size_t i = 0; i < width * height; i++) {
+        for(size_t i = 0; i < arraySize; i++) {
             aLightsOn += lights[i];
         }
     }
 
     void partB() {
-        const std::string str = input.text;
+        size_t resolution = getDimensions(), arraySize = resolution * resolution;
+        bool lights[arraySize];
 
-        size_t width, height;
-        width = height = getDimensions();
-
-        bool lights[width * height];
-        initLights(lights, width, height);
+        initLights(lights);
 
         for(size_t i = 0; i < 100; i++) {
-            runCycle(lights, width, height, true);
+            runCycle(lights, resolution, arraySize, true);
         }
 
         // set all corner lights on since its only virtual with runcycle
         lights[0] = true;
-        lights[width - 1] = true;
-        lights[(width * height) - width] = true;
-        lights[(width * height) - 1] = true;
+        lights[resolution - 1] = true;
+        lights[arraySize - resolution] = true;
+        lights[arraySize - 1] = true;
 
-        for(size_t i = 0; i < width * height; i++) {
+        for(size_t i = 0; i < arraySize; i++) {
             bLightsOn += lights[i];
         }
     }

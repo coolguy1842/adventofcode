@@ -23,14 +23,24 @@ std::vector<std::string> AOCUtil::split(std::string str, std::string delim) {
 }
 
 
-std::string AOCUtil::replace(std::string str, std::string find, std::string replace) {
+std::string AOCUtil::replace(std::string str, std::string find, std::string replace, size_t findOffset, size_t maxReplace) {
     if(find.empty()) return str;
 
-    size_t i = 0;
-    while((i = str.find(find, i)) != std::string::npos) {
-        str.replace(i, find.length(), replace);
-        i += replace.length();
+    if(maxReplace) {
+        size_t i = findOffset, replacementNum = 0;
+        while((i = str.find(find, i)) != std::string::npos && replacementNum++ < maxReplace) {
+            str.replace(i, find.length(), replace);
+            i += replace.length();
+        }
+    }
+    else {
+        size_t i = findOffset;
+        while((i = str.find(find, i)) != std::string::npos) {
+            str.replace(i, find.length(), replace);
+            i += replace.length();
+        }
     }
 
+    
     return str;
 }

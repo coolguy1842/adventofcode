@@ -12,7 +12,7 @@
 namespace AOCUtil {
 
 std::vector<std::string> split(std::string str, std::string delim);
-std::string replace(std::string str, std::string find, std::string replace);
+std::string replace(std::string str, std::string find, std::string replace, size_t findOffset = 0, size_t maxReplace = 0);
 
 // templates dont like being in source files
 template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
