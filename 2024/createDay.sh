@@ -1,9 +1,10 @@
 #!/bin/bash
+source "$(realpath $(dirname $0))/script_base.sh"
 
-path=$(realpath $(dirname $PWD/$0))
-day=${1%/}
-dayPath=$path/days/Day$day
+day=$1
+path=$(get_path $0)
 
+dayPath=$(get_day_path $path $day)
 if [ -e $dayPath ]; then
     echo Path Exists
     exit

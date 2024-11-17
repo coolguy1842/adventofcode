@@ -12,15 +12,13 @@ class Day : public AOCUtil::IDay {
 private:
 
 public:
-    Day() : AOCUtil::IDay(INPUT_PATH) {}
+    Day();
 
-    void partA() { }
-    void partB() { }
+    void partA();
+    void partB();
     
 
-    void printResults(bool partA, bool partB) {
-
-    }
+    void printResults(bool partA, bool partB);
 };
 
 #endif

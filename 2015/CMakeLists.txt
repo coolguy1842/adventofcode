@@ -24,8 +24,6 @@ include(FetchContent)
 
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall -pipe -g3 -O0 -DDEBUG -static")
 set(CMAKE_C_FLAGS_DEBUG_INIT "-Wall -pipe -g3 -O0 -DDEBUG -static")
-# set(CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math -O3 -Wall -pipe -march=native -static")
-# set(CMAKE_C_FLAGS_RELEASE_INIT "-ffast-math -O3 -Wall -pipe -march=native -static")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math -O3 -g3 -Wall -pipe -march=native -static")
 set(CMAKE_C_FLAGS_RELEASE_INIT "-ffast-math -O3 -g3 -Wall -pipe -march=native -static")
 

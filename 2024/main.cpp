@@ -2,25 +2,20 @@
 #include <Day.hpp>
 
 #include <csignal>
-#include <Tracy.hpp>
 
 int main(int argc, char** argv) {
     bool partA = false;
     bool partB = false;
     bool timer = false;
     
-    {
-        ZoneScopedN("CLI");
+    CLI::App app("Advent of Code Runner", "AOCRunner");
+    argv = app.ensure_utf8(argv);
 
-        CLI::App app("Advent of Code Runner", "AOCRunner");
-        argv = app.ensure_utf8(argv);
+    app.add_flag("-a,--parta", partA, "If the program should run part A");
+    app.add_flag("-b,--partb", partB, "If the program should run part B");
+    app.add_flag("-t,--timer", timer, "Display timings");
 
-        app.add_flag("-a,--parta", partA, "If the program should run part A");
-        app.add_flag("-b,--partb", partB, "If the program should run part B");
-        app.add_flag("-t,--timer", timer, "Display timings");
-
-        CLI11_PARSE(app, argc, argv);
-    }
+    CLI11_PARSE(app, argc, argv);
     
     Day day = Day();
 
@@ -30,16 +25,12 @@ int main(int argc, char** argv) {
         partB = partB || both;
         
         if(partA) {
-            ZoneScopedN("Part A");
-
             day.timerA.start();
             day.partA();
             day.timerA.stop();
         }
         
         if(partB) {
-            ZoneScopedN("Part B");
-
             day.timerB.start();
             day.partB();
             day.timerB.stop();

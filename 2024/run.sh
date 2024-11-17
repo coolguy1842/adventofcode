@@ -1,22 +1,20 @@
 #!/bin/bash
+source "$(realpath $(dirname $0))/script_base.sh"
+source "$(realpath $(dirname $0))/build.sh"
 
-path=$(realpath $(dirname $PWD/$0))
-day=${1%/}
-dayPath=$path/days/Day$day
 
-if [ ! -e $dayPath ]; then
-    echo Invalid Path
-    exit
-elif [ ! -e $dayPath/CMakeLists.txt ]; then
-    echo Invalid Path
-    exit
+if [[ $_ != $0 ]]; then
+    path=$(get_path $0)
+    buildType=$(validate_build_type $2)
+
+    day=$1
+    
+    run_build $path $buildType $day
+
+    restore_dir=$PWD
+    cd $path/build/days/Day$day
+    
+    ./day ${@:3}
+
+    cd $restore_dir
 fi
-
-./build.sh $1
-buildFile=$path/build/days/Day$day/day
-if [ ! -e $buildFile ]; then
-    echo Failed to build
-    exit
-fi
-
-$buildFile ${@:2}

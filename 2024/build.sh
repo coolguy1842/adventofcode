@@ -1,42 +1,29 @@
 #!/bin/bash
+source "$(realpath $(dirname $0))/script_base.sh"
 
-path=$(realpath $(dirname $PWD/$0))
-day=${1%/}
-dayPath=$path/days/Day$day
+run_build() {
+    path=$1
+    buildType=$2
+    day=$3
 
-if [ ! -e $dayPath ]; then
-    echo Invalid Path
-    exit
-elif [ ! -e $dayPath/CMakeLists.txt ]; then
-    echo Invalid Path
-    exit
-fi
+    dayPath="$(get_day_path $path $day)"
+    if [[ $(validate_day_path $dayPath) == "invalid" ]]; then
+        echo "Invalid Path"
+        exit 1
+    fi
 
-run_cmake() {
-    cmake $path -DCMAKE_BUILD_TYPE=Debug -DDAY=$day -G Ninja
+    if [ ! -e $path/build ]; then
+        init_build_path $path/build
+    fi
+        
+    run_cmake $path $buildType $day
 }
 
-init_build() {
-    restore_dir=$PWD
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    path=$(get_path $0)
+    buildType=$(validate_build_type $2)
 
-    echo Initializing build dir
+    day=$1
     
-    mkdir $path/build
-    cd $path/build
-
-    run_cmake
-    cd $restore_dir
-}
-
-if [ ! -e $path/build ]; then
-    init_build
+    run_build $path $buildType $day
 fi
-
-dir=$PWD
-cd build
-
-run_cmake
-# make -j $(lscpu | grep -E '^CPU\(s\):' | sed -n 's/.*\s\([0-9]*\).*/\1/p')
-ninja
-
-cd $dir
