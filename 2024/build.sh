@@ -1,4 +1,5 @@
 #!/bin/bash
+
 source "$(realpath $(dirname $0))/script_base.sh"
 
 run_build() {

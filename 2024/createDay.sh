@@ -1,4 +1,5 @@
 #!/bin/bash
+
 source "$(realpath $(dirname $0))/script_base.sh"
 
 day=$1
@@ -11,4 +12,3 @@ if [ -e $dayPath ]; then
 fi
 
 cp -r $path/DayTemplate $dayPath
-touch $dayPath/input.txt

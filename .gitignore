@@ -6,6 +6,10 @@
 **/input.txt
 **/input/*.txt
 
+**/DayInput.hpp
+
 **/session-cookie
 
 **/perf.data*
+
+!**/DayTemplate/include/DayInput.hpp

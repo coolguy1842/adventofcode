@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.5.0)
 
-add_compile_definitions(INPUT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/input.txt")
-
 find_package(CLI11 REQUIRED)
 
 include_directories(include)

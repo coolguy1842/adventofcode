@@ -20,6 +20,8 @@ public:
     Timer timerB;
     
     IDay(std::string inputPath) : input(Input(readInput(inputPath))), timerA("A"), timerB("B") {}
+    IDay(Input input) : input(input), timerA("A"), timerB("B") {}
+    
     virtual ~IDay() = default;
 
     virtual void partA() = 0;

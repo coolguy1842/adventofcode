@@ -14,7 +14,8 @@ if [[ $_ != $0 ]]; then
     restore_dir=$PWD
     cd $path/build/days/Day$day
     
-    ./day ${@:3}
+    perf record -a -g ./day ${@:3}
+    perf report --sort comm,dso
 
     cd $restore_dir
 fi
