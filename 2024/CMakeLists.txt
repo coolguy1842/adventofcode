@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.10.0)
 project(aoc VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -20,7 +20,6 @@ target_include_directories(aoc PUBLIC include)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
-include(FetchContent)
 
 set(CMAKE_CXX_FLAGS_DEBUG_INIT   "-Wall -pipe -g3 -O0 -DDEBUG -static")
 set(CMAKE_C_FLAGS_DEBUG_INIT     "-Wall -pipe -g3 -O0 -DDEBUG -static")
