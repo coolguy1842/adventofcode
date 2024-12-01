@@ -1,46 +1,61 @@
 #include <DayInput.hpp>
 #include <Day.hpp>
-#include <spdlog/spdlog.h>
-#include <unordered_map>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 #include <vector>
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
-size_t aSolution = 0;
+inline int compare(const long* a, const long* b) {
+    return *a - *b;
+}
+
+long aSolution = 0, bSolution = 0;
 void Day::partA() {
-    std::vector<size_t> leftList, rightList;
+    std::vector<long> leftList, rightList;
+    long left, right;
+    int len = 0;
 
-    for(std::string& line : input.getSplitText("\n")) {
-        size_t left, right;
+    const char* str = input.text.c_str();
 
-        sscanf(line.c_str(), "%zu   %zu", &left, &right);
+    while(sscanf(str += len, "%ld%*[ ]%ld\n%n", &left, &right, &len) == 2) {
         leftList.push_back(left);
         rightList.push_back(right);
     }
 
-    std::sort(leftList.begin(), leftList.end());
-    std::sort(rightList.begin(), rightList.end());
+    std::qsort(leftList.data(), leftList.size(), sizeof(long), (__compar_fn_t)compare);
+    std::qsort(rightList.data(), rightList.size(), sizeof(long), (__compar_fn_t)compare);
 
+    long *leftPtr = leftList.data(), *rightPtr = rightList.data();
     for(size_t i = 0; i < leftList.size(); i++) {
-        aSolution += std::abs((long long)leftList[i] - (long long)rightList[i]);
+        aSolution += std::abs(*leftPtr++ - *rightPtr++);
     }
 }
 
-size_t bSolution = 0;
 void Day::partB() {
-    std::vector<size_t> leftList;
-    std::unordered_map<size_t, size_t> frequency;
+    std::vector<long> leftList;
+    long left, right;
+    int len = 0;
 
-    for(std::string& line : input.getSplitText("\n")) {
-        size_t left, right;
-        sscanf(line.c_str(), "%zu   %zu", &left, &right);
-        
+    const char* str = input.text.c_str();
+    sscanf(str, "%*d%*[^0-9]%ld", &right);
+
+    // round to nearest next power of 10 - 1 e.g 500 rounds to 999
+    size_t arrSize = std::pow(10, std::ceil(std::log10(right))) - 1;
+    
+    // can have issues if your inputs numbers go past the stack limit, would have to swap to malloc and free or using new and delete[]
+    long frequency[arrSize];
+    memset(frequency, 0, arrSize * sizeof(long));
+
+    while(sscanf(str += len, "%ld%*[ ]%ld\n%n", &left, &right, &len) == 2) {
         leftList.push_back(left);
         frequency[right]++;
     }
 
-    for(const size_t& i : leftList) {
-        bSolution += i * frequency[i];
+    long* ptr = leftList.data();
+    for(size_t i = 0; i < leftList.size(); i++, ptr++) {
+        bSolution += *ptr * frequency[*ptr];
     }
 }
 
