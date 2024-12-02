@@ -8,43 +8,44 @@
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
-inline std::vector<long> parseNumbers(const std::string& line) {
-    std::vector<long> numbers;
+inline std::vector<std::vector<long>> parseNumbers(const std::string& line) {
+    std::vector<std::vector<long>> numbers;
 
     const char* str = line.c_str();
 
     long number;
     int read = 0;
-    while(sscanf(str += read, "%ld %n", &number, &read) == 1) {
-        numbers.push_back(number);
+    
+    std::vector<long> tempNumbers;
+    while(sscanf(str, "%ld%n", &number, &read) == 1) {
+        tempNumbers.push_back(number);
+
+        str += read;
+        if(str[0] == '\n') {
+            numbers.push_back(tempNumbers);
+            tempNumbers.clear();
+        }
     }
 
     return numbers;
 }
 
 enum ELevelDirection {
-    NONE,
     INCREASING,
     DECREASING
 };
 
 inline bool isSafe(const std::vector<long>& numbers) {
-    ELevelDirection direction = ELevelDirection::NONE;
+    ELevelDirection direction = numbers[0] > numbers[1] ? DECREASING : INCREASING;
     for(size_t i = 0; i < numbers.size() - 1; i++) {
-        const long& left = numbers[i];
-        const long& right = numbers[i + 1];
-
-        long distance = std::abs(left - right);
-
-        if(distance < 1 || distance > 3) {
-            return false;  
-        }
-
-        switch(direction) {
-        case NONE: direction = left > right ? DECREASING : INCREASING; break;
-        case INCREASING: if(left > right) return false; break;
-        case DECREASING: if(left < right) return false; break;
-        default: break;
+        const long &left = numbers[i], &right = numbers[i + 1];
+        
+        if(
+            (left == right) ||
+            (direction == INCREASING ? left > right : left < right) |
+            (std::abs(left - right) > 3)
+        ) {
+            return false;
         }
     }
 
@@ -54,9 +55,7 @@ inline bool isSafe(const std::vector<long>& numbers) {
 
 size_t aSafeReports = 0, bSafeReports = 0;
 void Day::partA() {
-    for(const std::string& line : input.getSplitText("\n")) {
-        std::vector<long> numbers = parseNumbers(line);
-
+    for(const std::vector<long>& numbers : parseNumbers(input.text)) {
         if(isSafe(numbers)) {
             aSafeReports++;
         }
@@ -64,9 +63,7 @@ void Day::partA() {
 }
 
 void Day::partB() {
-    for(const std::string& line : input.getSplitText("\n")) {
-        std::vector<long> numbers = parseNumbers(line);
-        
+    for(const std::vector<long>& numbers : parseNumbers(input.text)) {    
         for(size_t i = 0; i < numbers.size(); i++) {
             std::vector<long> tempNumbers = numbers;
             tempNumbers.erase(tempNumbers.begin() + i);
