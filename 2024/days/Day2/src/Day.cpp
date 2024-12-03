@@ -63,7 +63,7 @@ void Day::partA() {
 }
 
 void Day::partB() {
-    for(const std::vector<long>& numbers : parseNumbers(input.text)) {    
+    for(const std::vector<long>& numbers : parseNumbers(input.text)) {
         for(size_t i = 0; i < numbers.size(); i++) {
             std::vector<long> tempNumbers = numbers;
             tempNumbers.erase(tempNumbers.begin() + i);
