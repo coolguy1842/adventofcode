@@ -2,45 +2,52 @@
 #include <Day.hpp>
 #include <cstdio>
 
-#include <regex>
+#include <cstdlib>
+#include <cstring>
 #include <spdlog/spdlog.h>
+#include <string>
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
+#define COMP_STR(str1, str2) strncmp(str1, str2, std::min(strlen(str1), strlen(str2))) 
 
-size_t aSolution = 0, bSolution = 0;
-void Day::partA() {
-    std::regex exp(R"((mul\(\d+,\d+\)))");
-    
-    for(std::sregex_iterator it = std::sregex_iterator(input.text.begin(), input.text.end(), exp); it != std::sregex_iterator(); it++) {
-        size_t left, right;
-
-        sscanf(it->str().c_str(), "mul(%zu,%zu)", &left, &right);
-        aSolution += left * right;
-    }
-}
-
-void Day::partB() {
-    std::regex exp(R"(((mul\(\d+,\d+\))|(do(n't)?\(\))))");
-
+size_t partFunc(const std::string& str, bool partB = false) {
+    size_t pos = -1, out = 0;
     bool acceptMuls = true;
-    for(std::sregex_iterator it = std::sregex_iterator(input.text.begin(), input.text.end(), exp); it != std::sregex_iterator(); it++) {
-        std::string match = it->str();
 
-        switch(match[0]) {
-        case 'd': acceptMuls = match.size() == 4; break;
-        case 'm':
-            if(!acceptMuls) break;
+    while((pos = str.find("(", pos + 1)) != std::string::npos) {
+        if(partB && !acceptMuls && COMP_STR(&str[pos - 2], "do") == 0) {
+            if(str[pos + 1] != ')') {
+                continue;
+            }
 
+            acceptMuls = true;
+        }
+        else if(partB && acceptMuls && COMP_STR(&str[pos - 5], "don't") == 0) {
+            if(str[pos + 1] != ')') {
+                continue;
+            }
+
+            acceptMuls = false;
+        }
+        else if(acceptMuls && COMP_STR(&str[pos - 3], "mul") == 0) {
             size_t left, right;
-            sscanf(match.c_str(), "mul(%zu,%zu)", &left, &right);
-            
-            bSolution += left * right;
+            int read;
 
-            break;
-        default: break;
+            int res = sscanf(&str[pos + 1], "%zu,%zu%n", &left, &right, &read);
+            if(res != 2 || str[pos + read + 1] != ')') {
+                continue;
+            }
+
+            out += left * right;
         }
     }
+
+    return out;
 }
+
+size_t aSolution = 0, bSolution = 0;
+void Day::partA() { aSolution = partFunc(input.text); }
+void Day::partB() { bSolution = partFunc(input.text, true); }
 
 void Day::printResults(bool partA, bool partB) {
     if(partA) spdlog::info("Part A: {}", aSolution);
