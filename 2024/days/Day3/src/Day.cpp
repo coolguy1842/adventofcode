@@ -9,40 +9,35 @@ Day::Day() : AOCUtil::IDay(dayInput) {}
 
 size_t aSolution = 0, bSolution = 0;
 void Day::partA() {
-    auto exp = std::regex(R"((mul\(\d+,\d+\)))");
-
-    auto words_begin = std::sregex_iterator(input.text.begin(), input.text.end(), exp);
-    auto words_end = std::sregex_iterator();
-
-    for(std::sregex_iterator i = words_begin; i != words_end; ++i) {
-        std::string match = i->str();
-
+    std::regex exp(R"((mul\(\d+,\d+\)))");
+    
+    for(std::sregex_iterator it = std::sregex_iterator(input.text.begin(), input.text.end(), exp); it != std::sregex_iterator(); it++) {
         size_t left, right;
-        sscanf(match.c_str(), "mul(%zu,%zu)", &left, &right);
+
+        sscanf(it->str().c_str(), "mul(%zu,%zu)", &left, &right);
         aSolution += left * right;
     }
 }
 
 void Day::partB() {
-    auto exp = std::regex(R"(((mul\(\d+,\d+\))|(do(n't)?\(\))))");
-
-    auto words_begin = std::sregex_iterator(input.text.begin(), input.text.end(), exp);
-    auto words_end = std::sregex_iterator();
+    std::regex exp(R"(((mul\(\d+,\d+\))|(do(n't)?\(\))))");
 
     bool acceptMuls = true;
-    for(std::sregex_iterator i = words_begin; i != words_end; ++i) {
-        std::string match = i->str();
-        if(match == "do()") {
-            acceptMuls = true;
-        }
-        else if(match == "don't()") {
-            acceptMuls = false;
-        }
-        else if(acceptMuls) {
+    for(std::sregex_iterator it = std::sregex_iterator(input.text.begin(), input.text.end(), exp); it != std::sregex_iterator(); it++) {
+        std::string match = it->str();
+
+        switch(match[0]) {
+        case 'd': acceptMuls = match.size() == 4; break;
+        case 'm':
+            if(!acceptMuls) break;
+
             size_t left, right;
             sscanf(match.c_str(), "mul(%zu,%zu)", &left, &right);
             
             bSolution += left * right;
+
+            break;
+        default: break;
         }
     }
 }
