@@ -4,6 +4,3 @@
 [submodule "2015/thirdparty/scnlib"]
 	path = 2015/thirdparty/scnlib
 	url = https://github.com/eliaskosunen/scnlib.git
-[submodule "2024/thirdparty/scnlib"]
-	path = 2024/thirdparty/scnlib
-	url = https://github.com/eliaskosunen/scnlib.git

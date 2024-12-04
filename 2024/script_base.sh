@@ -67,6 +67,6 @@ run_cmake() {
     buildType=$2
     day=$3
 
-    cmake $path -B $path/build -DCMAKE_BUILD_TYPE=$buildType -DDAY=$day -G Ninja
+    cmake $path -B $path/build -DCMAKE_BUILD_TYPE=$buildType -DDAY=$day -G Ninja -DUSE_CCACHE=YES -DCCACHE_OPTIONS="CCACHE_CPP2=true;CCACHE_SLOPPINESS=clang_index_store"
     cmake --build $path/build -- -j$(nproc)
 }

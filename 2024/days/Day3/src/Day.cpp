@@ -7,38 +7,28 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
-Day::Day() : AOCUtil::IDay(dayInput) {}
-#define COMP_STR(str1, str2) strncmp(str1, str2, std::min(strlen(str1), strlen(str2))) 
+Day::Day() : AOCUtil::IDay(dayInput) {} 
 
 size_t partFunc(const std::string& str, bool partB = false) {
-    size_t pos = -1, out = 0;
+    const char *strPtr = str.c_str(), *ptr = strPtr - 1;
+    
+    size_t out = 0;
     bool acceptMuls = true;
 
-    while((pos = str.find("(", pos + 1)) != std::string::npos) {
-        if(partB && !acceptMuls && COMP_STR(&str[pos - 2], "do") == 0) {
-            if(str[pos + 1] != ')') {
-                continue;
-            }
-
+    while((ptr = strstr(ptr + 1, "("))) {
+        if(partB && !acceptMuls && strncmp(ptr - 2, "do()", 4) == 0) {
             acceptMuls = true;
         }
-        else if(partB && acceptMuls && COMP_STR(&str[pos - 5], "don't") == 0) {
-            if(str[pos + 1] != ')') {
-                continue;
-            }
-
+        else if(partB && acceptMuls && strncmp(ptr - 5, "don't()", 7) == 0) {
             acceptMuls = false;
         }
-        else if(acceptMuls && COMP_STR(&str[pos - 3], "mul") == 0) {
+        else if(acceptMuls && strncmp(ptr - 3, "mul", 3) == 0) {
             size_t left, right;
-            int read;
+            char endChar;
 
-            int res = sscanf(&str[pos + 1], "%zu,%zu%n", &left, &right, &read);
-            if(res != 2 || str[pos + read + 1] != ')') {
-                continue;
+            if(sscanf(ptr + 1, "%zu,%zu%c", &left, &right, &endChar) == 3 && endChar == ')') {
+                out += left * right;
             }
-
-            out += left * right;
         }
     }
 

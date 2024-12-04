@@ -10,7 +10,6 @@ file(GLOB UTIL_SRC
 
 list(REMOVE_ITEM UTIL_SRC src/main.cpp)
 
-add_subdirectory(thirdparty/scnlib)
 find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
@@ -21,12 +20,21 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
+include(cmake/CPM.cmake)
+
+CPMAddPackage(
+  NAME Ccache.cmake
+  GITHUB_REPOSITORY TheLartians/Ccache.cmake
+  VERSION 1.2
+)
+
+
 set(CMAKE_CXX_FLAGS_DEBUG_INIT   "-Wall -pipe -g3 -O0 -DDEBUG -static")
 set(CMAKE_C_FLAGS_DEBUG_INIT     "-Wall -pipe -g3 -O0 -DDEBUG -static")
-set(CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math -O3 -g3 -Wall -pipe -march=native -static")
-set(CMAKE_C_FLAGS_RELEASE_INIT   "-ffast-math -O3 -g3 -Wall -pipe -march=native -static")
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-ffast-math -O3 -Wall -pipe -march=native -static")
+set(CMAKE_C_FLAGS_RELEASE_INIT   "-ffast-math -O3 -Wall -pipe -march=native -static")
 
-target_link_libraries(aoc PUBLIC scn::scn spdlog::spdlog nlohmann_json::nlohmann_json)
+target_link_libraries(aoc PUBLIC spdlog::spdlog nlohmann_json::nlohmann_json)
 target_link_libraries(aoc PRIVATE $<$<BOOL:${MINGW}>:ws2_32> pthread $<$<BOOL:${MINGW}>:tbb12>)
 set_property(TARGET aoc PROPERTY CXX_STANDARD 23)
 

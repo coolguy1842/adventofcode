@@ -15,15 +15,17 @@ std::string replace(std::string str, std::string find, std::string replace);
 
 // templates dont like being in source files
 template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
-T strtonumeric(const char* str) {
-    bool negative = *str == '-';
+T strtonumeric(const char* str, size_t* readChars = NULL) {
+    const char* ptr = str;
+    bool negative = *ptr == '-';
     T out = 0;
 
-    if(negative) str++;
-    while(*str) {
-        out = out * 10 + (*str++ - '0');
+    if(negative) ptr++;
+    while(*ptr) {
+        out = out * 10 + (*ptr++ - '0');
     }
     
+    if(readChars != NULL) *readChars = ptr - str;
     return negative ? -out : out;
 }
 
