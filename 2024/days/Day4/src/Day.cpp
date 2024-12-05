@@ -6,32 +6,31 @@
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
-bool isOutOfRange(const std::vector<std::string>& grid, const long& x, const long& y) {
-    return x < 0 || y < 0 || x >= grid[0].size() || y >= grid.size();
-}
-
 size_t aSolution = 0;
 void Day::partA() {
-    std::vector<std::string> grid = input.getSplitText("\n");
+    std::string& str = input.text;
+    long width = (strstr(str.c_str(), "\n") - str.c_str());
 
-    for(long i = 0; i < grid.size(); i++) {
-        for(long j = 0; j < grid[0].size(); j++) {
-            if(grid[i][j] != 'X') {
+    for(long i = 0; i < str.size(); i++) {
+        if(str[i] != 'X') {
+            continue;
+        }
+
+        for(long j = 0; j < 9; j++) {    
+            if(j == 4) {
                 continue;
             }
 
-            for(long k = 0; k < 9; k++) {
-                long dX = (k % 3) - 1, dY = (k / 3) - 1;
-                
-                if( 
-                    k != 4 &&
-                    !isOutOfRange(grid, j + (dX * 3), i + (dY * 3)) &&
-                    grid[i + (dY * 1)][j + (dX * 1)] == 'M' &&
-                    grid[i + (dY * 2)][j + (dX * 2)] == 'A' &&
-                    grid[i + (dY * 3)][j + (dX * 3)] == 'S'
-                ) {
-                    aSolution++;
-                }
+            long dX = (j % 3) - 1, dY = ((j / 3) - 1) * (width + 1);
+            long endPos = i + (dX * 3) + (dY * 3);
+            
+            if(
+                (endPos >= 0 || endPos < str.size()) &&
+                str[i +  dX      +  dY     ] == 'M' &&
+                str[i + (dX * 2) + (dY * 2)] == 'A' &&
+                str[i + (dX * 3) + (dY * 3)] == 'S'
+            ) {
+                aSolution++;
             }
         }
     }
