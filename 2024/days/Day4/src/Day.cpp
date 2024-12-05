@@ -8,29 +8,27 @@ Day::Day() : AOCUtil::IDay(dayInput) {}
 
 size_t aSolution = 0;
 void Day::partA() {
-    std::string& str = input.text;
-    long width = (strstr(str.c_str(), "\n") - str.c_str());
+    const size_t& strSize = input.text.size();
+    
+    const char *strPtr = input.text.c_str(), *ptr = strPtr - 1;
+    long width = strstr(strPtr, "\n") - strPtr;
+    
+    while((ptr = strstr(ptr + 1, "X"))) {
+        size_t i = ptr - strPtr;
 
-    for(long i = 0; i < str.size(); i++) {
-        if(str[i] != 'X') {
-            continue;
-        }
-
-        for(long j = 0; j < 9; j++) {    
-            if(j == 4) {
-                continue;
-            }
-
-            long dX = (j % 3) - 1, dY = ((j / 3) - 1) * (width + 1);
-            long endPos = i + (dX * 3) + (dY * 3);
-            
-            if(
-                (endPos >= 0 || endPos < str.size()) &&
-                str[i +  dX      +  dY     ] == 'M' &&
-                str[i + (dX * 2) + (dY * 2)] == 'A' &&
-                str[i + (dX * 3) + (dY * 3)] == 'S'
-            ) {
-                aSolution++;
+        for(long dY = -(width + 1); dY <= (width + 1); dY += (width + 1)) {
+            for(long dX = -1; dX <= 1; dX++) {
+                size_t endPos = i + (dX * 3) + (dY * 3);
+                
+                if(
+                    // unsigned, so if negative, itll wrap around and be greater than strSize
+                    endPos < strSize &&
+                    strPtr[i + dX + dY] == 'M' &&
+                    strPtr[i + dX + dX + dY + dY] == 'A' &&
+                    strPtr[endPos] == 'S'
+                ) {
+                    aSolution++;
+                }
             }
         }
     }
