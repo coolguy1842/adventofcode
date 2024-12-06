@@ -4,35 +4,27 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <set>
+#include <list>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
+
 struct Position {
-    long x, y;
-
-    inline std::size_t operator()(const Position& p) const {
-        return (p.x << 32) + p.y;
-    }
-
-    inline bool operator==(const Position& p) const {
-        return x == p.x && y == p.y;
-    }
+    size_t x, y;
 };
 
 enum Direction {
-    UP = 0,
-    RIGHT,
-    DOWN,
-    LEFT
+    NONE = 0,
+    UP = 1 << 0,
+    RIGHT = 1 << 1,
+    DOWN = 1 << 2,
+    LEFT = 1 << 3
 };
 
 struct Guard {
-    Position pos;
-    Direction dir;
+    size_t x, y;
+    Direction dir = UP;
 };
 
 enum GridType {
@@ -41,44 +33,9 @@ enum GridType {
     BORDER
 };
 
-struct Grid {
-    Grid(size_t width, size_t height) : width(width), height(height) {
-        data = (GridType**)calloc(height + 2, sizeof(GridType*));
-        visited = {};
-
-        for(long y = 0; y <= height + 1; y++) {
-            data[y] = (GridType*)calloc(width + 2, sizeof(GridType));
-            for(long x = 0; x <= width + 1; x++) {
-                data[y][x] = GridType::BORDER;
-            }
-        }
-    }
-
-    Grid(Grid& otherGrid) {
-        this->width = otherGrid.width;
-        this->height = otherGrid.height;
-
-        this->guard = otherGrid.guard;
-        this->visited = otherGrid.visited;
-
-        data = (GridType**)calloc(height + 2, sizeof(GridType*));
-
-        for(long y = 0; y <= height + 1; y++) {
-            data[y] = (GridType*)calloc(width + 2, sizeof(GridType));
-            memcpy(data[y], otherGrid.data[y], (width + 2) * sizeof(GridType));
-        }
-    }
-
-    ~Grid() {
-        free(data);
-    }
-
-    size_t width, height;
-
-    GridType** data;
-    std::unordered_map<Position, std::set<Direction>, Position> visited;
-
-    Guard guard;
+struct GridPosition {
+    GridType type;
+    long visited;
 };
 
 inline Direction rotateDir(const Direction& dir) {
@@ -86,61 +43,97 @@ inline Direction rotateDir(const Direction& dir) {
         return Direction::UP;
     }
 
-    return (Direction)(dir + 1);
+    return (Direction)(dir << 1);
 }
 
-void stepGuard(Grid& grid) {
-    long dX = 0, dY = 0;
-    Position& pos = grid.guard.pos;
-    Direction& dir = grid.guard.dir;
+struct Grid {
+    size_t width, height;
+    GridPosition** data;
 
-    switch(dir) {
-    case UP   : dY = -1; break;
-    case RIGHT: dX =  1; break;
-    case DOWN : dY =  1; break;
-    case LEFT : dX = -1; break;
-    default: break;
-    }
+    Guard guard;
 
-    if(grid.data[pos.y + dY][pos.x + dX] == GridType::BLOCK) {
-        dir = rotateDir(dir);
 
-        return;
-    }
-
-    grid.visited[Position(pos.x, pos.y)].emplace(dir);
-
-    pos.y += dY;
-    pos.x += dX;
-}
-
-size_t aSolution = 0;
-void Day::partA() {
-    const std::vector<std::string>& lines = input.getSplitText("\n");
-
-    Grid grid(lines[0].size(), lines.size());
-
-    for(long y = 1; y <= lines.size(); y++) {
-        for(long x = 1; x <= lines[0].size(); x++) {
-            switch(lines[y - 1][x - 1]) {
-            case '#':
-                grid.data[y][x] = GridType::BLOCK;
-                break;
-            case '^':
-                grid.guard.pos = Position(x, y);
-                grid.guard.dir = UP;
-            default: grid.data[y][x] = GridType::EMPTY; break;
+    void resetVisited() {
+        for(size_t y = 0; y <= height + 1; y++) {
+            for(size_t x = 0; x <= width + 1; x++) {
+                data[y][x].visited = NONE;
             }
         }
     }
 
-    while(grid.data[grid.guard.pos.y][grid.guard.pos.x] != BORDER) {
-        stepGuard(grid);
+    Grid(const std::string& input) {
+        const char* strPtr = input.c_str();
+        width = strpbrk(strPtr, "\n") - strPtr;
+        height = input.size() / width;
+        
+        data = (GridPosition**)calloc(height + 2, sizeof(GridPosition*));
+        
+        for(size_t y = 0; y <= height + 1; y++) {
+            data[y] = (GridPosition*)calloc(width + 2, sizeof(GridPosition));
+            for(size_t x = 0; x <= width + 1; x++) {
+                data[y][x].type = GridType::BORDER;
+                data[y][x].visited = NONE;
+            }
+        }
+
+        size_t x = 1, y = 1;
+        for(size_t i = 0; i < input.size(); i++) {
+            switch(strPtr[i]) {
+            case '#': data[y][x++].type = GridType::BLOCK; break;
+            case '^':
+                guard.x = x;
+                guard.y = y;
+
+            case '.': data[y][x++].type = GridType::EMPTY; break;
+            case '\n':
+                x = 1;
+                y++;
+
+                break;
+            }
+        }
+    }
+
+    ~Grid() {
+        free(data);
+    }
+
+
+    void stepGuard() {
+        long dX = 0, dY = 0;
+        
+        switch(guard.dir) {
+        case UP   : dY = -1; break;
+        case RIGHT: dX =  1; break;
+        case DOWN : dY =  1; break;
+        case LEFT : dX = -1; break;
+        default: break;
+        }
+
+        if(data[guard.y + dY][guard.x + dX].type == GridType::BLOCK) {
+            guard.dir = rotateDir(guard.dir);
+
+            return;
+        }
+
+        data[guard.y][guard.x].visited |= guard.dir;
+
+        guard.y += dY;
+        guard.x += dX;
+    }
+};
+
+size_t aSolution = 0;
+void Day::partA() {
+    Grid grid(input.text);
+
+    while(grid.data[grid.guard.y][grid.guard.x].type != BORDER) {
+        grid.stepGuard();
     }
 
     for(size_t y = 1; y <= grid.height; y++) {
         for(size_t x = 1; x <= grid.width; x++) {
-            if(grid.visited.contains(Position(x, y))) {
+            if(grid.data[y][x].visited != 0) {
                 aSolution++;
             }
         }
@@ -149,34 +142,18 @@ void Day::partA() {
 
 size_t bSolution = 0;
 void Day::partB() {
-const std::vector<std::string>& lines = input.getSplitText("\n");
+    Grid grid(input.text);
+    size_t guardX = grid.guard.x, guardY = grid.guard.y;
 
-    Grid grid(lines[0].size(), lines.size());
-
-    for(long y = 1; y <= lines.size(); y++) {
-        for(long x = 1; x <= lines[0].size(); x++) {
-            switch(lines[y - 1][x - 1]) {
-            case '#':
-                grid.data[y][x] = GridType::BLOCK;
-                break;
-            case '^':
-                grid.guard.pos = Position(x, y);
-                grid.guard.dir = UP;
-            default: grid.data[y][x] = GridType::EMPTY; break;
-            }
-        }
-    }
-
-    Grid mainPathGrid = grid;
     // get main path
-    while(mainPathGrid.data[mainPathGrid.guard.pos.y][mainPathGrid.guard.pos.x] != BORDER) {
-        stepGuard(mainPathGrid);
+    while(grid.data[grid.guard.y][grid.guard.x].type != BORDER) {
+        grid.stepGuard();
     }
 
-    std::vector<Position> possibleBlocks;
-    for(size_t y = 1; y <= mainPathGrid.height; y++) {
-        for(size_t x = 1; x <= mainPathGrid.width; x++) {
-            if((grid.guard.pos.x == x && grid.guard.pos.y == y) || !mainPathGrid.visited.contains(Position(x, y))) {
+    std::list<Position> possibleBlocks;
+    for(size_t y = 1; y <= grid.height; y++) {
+        for(size_t x = 1; x <= grid.width; x++) {
+            if((grid.guard.x == x && grid.guard.y == y) || grid.data[y][x].visited == NONE) {
                 continue;
             }
 
@@ -184,18 +161,27 @@ const std::vector<std::string>& lines = input.getSplitText("\n");
         }
     }
 
-    for(Position& newBlock : possibleBlocks) {
-        Grid tmp = grid;
-        tmp.data[newBlock.y][newBlock.x] = BLOCK;
+    for(Position& pos : possibleBlocks) {
+        GridPosition& block = grid.data[pos.y][pos.x];
 
-        while(tmp.data[tmp.guard.pos.y][tmp.guard.pos.x] != BORDER) {
-            if(tmp.visited[Position(tmp.guard.pos.x, tmp.guard.pos.y)].contains(tmp.guard.dir)) {
+        grid.resetVisited();
+        grid.guard.x = guardX;
+        grid.guard.y = guardY;
+        grid.guard.dir = UP;
+
+        GridType prevType = block.type;
+        block.type = BLOCK;
+
+        while(grid.data[grid.guard.y][grid.guard.x].type != BORDER) {
+            if(grid.data[grid.guard.y][grid.guard.x].visited & grid.guard.dir) {
                 bSolution++;
                 break;    
             }
 
-            stepGuard(tmp);
+            grid.stepGuard();
         }
+
+        block.type = prevType;
     }
 }
 
