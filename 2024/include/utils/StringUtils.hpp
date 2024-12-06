@@ -10,7 +10,8 @@
 
 namespace AOCUtil {
 
-std::vector<std::string> split(std::string str, std::string delim);
+// will split by matching the delim string
+std::vector<std::string> split(std::string str, const char* delim);
 std::string replace(std::string str, std::string find, std::string replace);
 
 // templates dont like being in source files

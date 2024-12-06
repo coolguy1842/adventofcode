@@ -4,7 +4,7 @@ void AOCUtil::Input::clearCaches() {
     this->splitCaches = {};
 }
 
-std::vector<std::string>& AOCUtil::Input::getSplitText(std::string delim) {
+std::vector<std::string>& AOCUtil::Input::getSplitText(const char* delim) {
     auto it = this->splitCaches.find(delim);
     if(it != this->splitCaches.end()) {
         return it->second;

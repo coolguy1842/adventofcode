@@ -9,8 +9,14 @@
 #include <vector>
 
 void initRules(const std::vector<std::string>& input, std::unordered_map<size_t, std::unordered_set<size_t>>& rules, std::vector<std::vector<size_t>>& updates) {
+    bool doRules = true;
     for(const std::string& str : input) {
-        if(str.size() <= 5) {
+        if(str.size() == 0) {
+            doRules = false;
+            continue;
+        }
+
+        if(doRules) {
             size_t left, right;
             sscanf(str.c_str(), "%zu|%zu", &left, &right);
 

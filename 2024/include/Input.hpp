@@ -21,7 +21,7 @@ public:
     
     // use if text is modified
     void clearCaches();
-    std::vector<std::string>& getSplitText(std::string delim);
+    std::vector<std::string>& getSplitText(const char* delim);
 };
 
 };

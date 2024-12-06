@@ -8,21 +8,20 @@
 #include <string.h>
 
 
-std::vector<std::string> AOCUtil::split(std::string str, std::string delim) {
+std::vector<std::string> AOCUtil::split(std::string str, const char* delim) {
     std::vector<std::string> out;
 
-    const char* delimPtr = delim.c_str();
+    const char *strPtr = str.c_str(), *tmp;
+    size_t delimLen = strlen(delim);
+    while((tmp = strstr(strPtr, delim)) != NULL) {
+        out.push_back(std::string(strPtr, tmp));
 
-    char* temp = (char*)malloc(str.size() + 1);
-    strcpy(temp, str.c_str());
-
-    char* res = strtok(temp, delimPtr);
-    while(res != nullptr) {
-        out.push_back(std::string(res));
-        res = strtok(nullptr, delimPtr);
+        tmp += delimLen;
+        strPtr = tmp;
     }
 
-    free(temp);
+    out.push_back(std::string(strPtr));
+    
     return out;
 }
 
