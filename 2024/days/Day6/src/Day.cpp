@@ -4,18 +4,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <list>
 #include <spdlog/spdlog.h>
 #include <string>
 
+#define MAX_LOOP_STEPS 5'700
+
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
-struct Position {
-    size_t x, y;
-};
-
 enum Direction {
-    NONE  = 0,
     UP    = 1 << 0,
     RIGHT = 1 << 1,
     DOWN  = 1 << 2,
@@ -23,79 +19,35 @@ enum Direction {
 };
 
 struct Guard {
-    Position pos;
+    size_t pos;
     Direction dir = UP;
 };
 
 enum GridType {
     EMPTY,
-    BLOCK,
-    BORDER
+    BLOCK
 };
-
-struct GridPosition {
-    GridType type;
-    long visited;
-};
-
-inline Direction rotateDir(const Direction& dir) {
-    if(dir == Direction::LEFT) {
-        return Direction::UP;
-    }
-
-    return (Direction)(dir << 1);
-}
 
 struct Grid {
     size_t width, height;
-    GridPosition** data;
+    GridType* data;
 
     Guard guard;
-
-
-    void resetVisited() {
-        for(size_t y = 0; y <= height + 1; y++) {
-            for(size_t x = 0; x <= width + 1; x++) {
-                data[y][x].visited = NONE;
-            }
-        }
-    }
-
-    bool countVisited() {
-        for(size_t y = 0; y <= height + 1; y++) {
-            for(size_t x = 0; x <= width + 1; x++) {
-                data[y][x].visited = NONE;
-            }
-        }
-    }
-
 
     Grid(const std::string& input) {
         const char* strPtr = input.c_str();
         width = strpbrk(strPtr, "\n") - strPtr;
         height = input.size() / width;
         
-        data = (GridPosition**)calloc(height + 2, sizeof(GridPosition*));
-        
-        for(size_t y = 0; y <= height + 1; y++) {
-            data[y] = (GridPosition*)calloc(width + 2, sizeof(GridPosition));
-            for(size_t x = 0; x <= width + 1; x++) {
-                data[y][x].type = GridType::BORDER;
-                data[y][x].visited = NONE;
-            }
-        }
+        data = (GridType*)calloc(width * height, sizeof(GridType));
 
-        size_t x = 1, y = 1;
+        size_t pos = 0;
         for(size_t i = 0; i < input.size(); i++) {
             switch(strPtr[i]) {
-            case '#': data[y][x++].type = GridType::BLOCK; break;
-            case '^': guard.pos = { x, y };
-            case '.': data[y][x++].type = GridType::EMPTY; break;
-            case '\n':
-                x = 1;
-                y++;
-
-                break;
+            case '#': data[pos++] = GridType::BLOCK; break;
+            case '^': guard.pos = pos;
+            case '.': data[pos++] = GridType::EMPTY; break;
+            default: break;
             }
         }
     }
@@ -105,27 +57,31 @@ struct Grid {
     }
 
 
-    void stepGuard() {
-        long dX = 0, dY = 0;
-        
+    bool stepGuard() {
+        top:
+        size_t nextPos;
         switch(guard.dir) {
-        case UP   : dY = -1; break;
-        case RIGHT: dX =  1; break;
-        case DOWN : dY =  1; break;
-        case LEFT : dX = -1; break;
-        default: break;
+        case UP   : if(guard.pos <= width) return false; nextPos = guard.pos - width; break;
+        case DOWN : if(guard.pos >= (width * height) - width) return false; nextPos = guard.pos + width; break;
+        // if left or right, then check if the x row changed, if it did then we went out of the border
+        case RIGHT: if(guard.pos / width != (guard.pos + 1) / width) return false; nextPos = guard.pos + 1; break;
+        case LEFT : if(guard.pos / width != (guard.pos - 1) / width) return false; nextPos = guard.pos - 1; break;
+        default: return false;
         }
 
-        if(data[guard.pos.y + dY][guard.pos.x + dX].type == GridType::BLOCK) {
-            guard.dir = rotateDir(guard.dir);
+        if(data[nextPos] == GridType::BLOCK) {
+            if(guard.dir == Direction::LEFT) {
+                guard.dir = Direction::UP;
 
-            return;
+                goto top;
+            }
+
+            guard.dir = (Direction)(guard.dir << 1);
+            goto top;
         }
 
-        data[guard.pos.y][guard.pos.x].visited |= guard.dir;
-
-        guard.pos.y += dY;
-        guard.pos.x += dX;
+        guard.pos = nextPos;
+        return true;
     }
 };
 
@@ -133,62 +89,56 @@ size_t aSolution = 0;
 void Day::partA() {
     Grid grid(input.text);
 
-    while(grid.data[grid.guard.pos.y][grid.guard.pos.x].type != BORDER) {
-        grid.stepGuard();
-    }
-
-    for(size_t y = 1; y <= grid.height; y++) {
-        for(size_t x = 1; x <= grid.width; x++) {
-            if(grid.data[y][x].visited != NONE) {
-                aSolution++;
-            }
+    bool* visited = (bool*)calloc(grid.width * grid.height, sizeof(bool));
+    do {
+        bool& visit = visited[grid.guard.pos];
+        if(!visit) {
+            visit = true;
+            aSolution++;
         }
-    }
+    } while(grid.stepGuard());
+
+    free(visited);
 }
 
 size_t bSolution = 0;
 void Day::partB() {
     Grid grid(input.text);
-    Position guardPos = grid.guard.pos;
+    size_t guardPos = grid.guard.pos;
 
     // get main path
-    while(grid.data[grid.guard.pos.y][grid.guard.pos.x].type != BORDER) {
-        grid.stepGuard();
-    }
+    bool* visited = (bool*)calloc(grid.width * grid.height, sizeof(bool));
+    while(grid.stepGuard()) {
+        bool& visit = visited[grid.guard.pos];
+        if(!visit) {
+            visit = true;
 
-    std::list<Position> possibleBlocks;
-    for(size_t y = 1; y <= grid.height; y++) {
-        for(size_t x = 1; x <= grid.width; x++) {
-            if(grid.data[y][x].visited == NONE || (grid.guard.pos.x == x && grid.guard.pos.y == y)) {
-                continue;
+            size_t prevPos = grid.guard.pos;
+            Direction prevDir = grid.guard.dir;
+            
+            GridType& block = grid.data[prevPos], prevType = block;
+            block = BLOCK;
+
+            grid.guard.pos = guardPos;
+            grid.guard.dir = UP;
+            
+            size_t steps = 0;
+            while(grid.stepGuard()) {
+                // this might need adjusting depending on input
+                if(steps++ > MAX_LOOP_STEPS) {
+                    bSolution++;
+                    break;
+                }
             }
 
-            possibleBlocks.push_back(Position(x, y));
+            block = prevType;
+
+            grid.guard.pos = prevPos;
+            grid.guard.dir = prevDir;
         }
     }
 
-    for(const Position& pos : possibleBlocks) {
-        GridPosition& block = grid.data[pos.y][pos.x];
-
-        grid.resetVisited();
-        grid.guard.pos.x = guardPos.x;
-        grid.guard.pos.y = guardPos.y;
-        grid.guard.dir = UP;
-
-        GridType prevType = block.type;
-        block.type = BLOCK;
-
-        while(grid.data[grid.guard.pos.y][grid.guard.pos.x].type != BORDER) {
-            if(grid.data[grid.guard.pos.y][grid.guard.pos.x].visited & grid.guard.dir) {
-                bSolution++;
-                break;    
-            }
-
-            grid.stepGuard();
-        }
-
-        block.type = prevType;
-    }
+    free(visited);
 }
 
 void Day::printResults(bool partA, bool partB) {
