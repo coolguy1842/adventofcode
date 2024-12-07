@@ -11,7 +11,7 @@ void AOCUtil::Timer::start() {
 
 std::optional<duration> AOCUtil::Timer::stop() {
     if(!_start.has_value()) {
-        return this->get_time();
+        return std::nullopt;
     }
 
     _stop = std::chrono::high_resolution_clock::now();
@@ -76,7 +76,7 @@ void AOCUtil::AccumulatingTimer::start() {
 
 std::optional<duration> AOCUtil::AccumulatingTimer::stop() {
     if(!_start.has_value()) {
-        return this->get_time();
+        return std::nullopt;
     }
 
     _lastStop = std::chrono::high_resolution_clock::now();
