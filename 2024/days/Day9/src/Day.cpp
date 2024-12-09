@@ -12,73 +12,12 @@ struct FileInfo {
     unsigned char blocks;
 };
 
-void printDiskMap(const std::vector<FileInfo>& diskMap) {
-    for(const FileInfo& info : diskMap) {
-        for(unsigned char i = 0; i < info.blocks; i++) {
-            if(info.id != -1) {
-                printf("%zu", info.id);
-            }
-            else {
-                printf(".");
-            }
-        }
-    }
-
-    printf("\n");
-}
-
-size_t aSolution = 0;
-void Day::partA() {
-    std::vector<int64_t> info;
-
-    int64_t id = 0;
-    bool isFile = true;
-    for(const char& c : input.text) {
-        unsigned char blocks =  c - '0';
-        int64_t insert = isFile ? id++ : -1;
-        
-        for(unsigned char i = 0; i < blocks; i++) {
-            info.push_back(insert);
-        }
-        
-        isFile = !isFile;
-    }
-
-    for(long i = info.size() - 1; i >= 0; i--) {
-        int64_t& cur = info[i];
-        if(cur == -1) {
-            continue;
-        }
-
-        for(size_t j = 0; j <= info.size(); j++) {
-            int64_t& check = info[j];
-            if(check != -1) {
-                continue;
-            }
-
-            std::swap(info[i], info[j]);
-            break;
-        }
-    }
-
-    info.erase(info.begin());
-    info.push_back(-1);
-
-    for(size_t i = 0; i < info.size(); i++) {
-        int64_t& id = info[i];
-        if(id == -1) continue;
-
-        aSolution += id * i;
-    }
-}
-
-size_t bSolution = 0;
-void Day::partB() {
+size_t partFunc(const std::string& diskMapStr, const bool& partA) {
     std::vector<FileInfo> diskMap;
 
     int64_t id = 0;
     bool isFile = true;
-    for(const char& c : input.text) {
+    for(const char& c : diskMapStr) {
         unsigned char blocks =  c - '0';
         diskMap.push_back({ isFile ? id++ : -1, blocks });
         
@@ -86,36 +25,44 @@ void Day::partB() {
     }
 
     for(int64_t i = diskMap.size() - 1; i >= 0; i--) {
-        const FileInfo& info = diskMap[i];
+        FileInfo& info = diskMap[i];
         if(info.id == -1) {
             continue;
         }
 
         for(size_t j = 0; j < i; j++) {
             FileInfo& space = diskMap[j];
-            if(space.id != -1 || space.blocks < info.blocks) {
+            if(space.id != -1 || (!partA && space.blocks < info.blocks)) {
                 continue;
             }
 
             if(space.blocks == info.blocks) {
-                std::swap(diskMap[i], diskMap[j]);
+                std::swap(info, space);
             }
-            else {
+            else if(space.blocks > info.blocks) {
                 unsigned char blocksLeft = space.blocks - info.blocks;
                 space.blocks = info.blocks;
 
-                std::swap(diskMap[i], diskMap[j]);
+                std::swap(info, space);
+
+                diskMap.insert(diskMap.begin() + j + 1, { -1, blocksLeft });
+            }
+            else if(partA) {
+                unsigned char blocksLeft = info.blocks - space.blocks;
+                info.blocks = space.blocks;
+
+                std::swap(info, space);
                 
-                if(blocksLeft > 0) {
-                    diskMap.insert(diskMap.begin() + j + 1, { -1, blocksLeft });
-                }
+                // info reference was swapped to space, so use space for the id
+                diskMap.insert(diskMap.begin() + i, { space.id, blocksLeft });
+                i++;
             }
 
             break;
         }
     }
 
-    size_t block = 0;
+    size_t block = 0, out = 0;
     for(size_t i = 0; i < diskMap.size(); i++) {
         FileInfo& info = diskMap[i];
         if(info.id == -1) {
@@ -124,10 +71,16 @@ void Day::partB() {
         }
 
         for(unsigned char i = 0; i < info.blocks; i++) {
-            bSolution += info.id * block++;
+            out += info.id * block++;
         }
     }
+
+    return out;
 }
+
+size_t aSolution = 0, bSolution = 0;
+void Day::partA() { aSolution = partFunc(input.text, true ); }
+void Day::partB() { bSolution = partFunc(input.text, false); }
 
 void Day::printResults(bool partA, bool partB) {
     if(partA) spdlog::info("Part A: {}", aSolution);
