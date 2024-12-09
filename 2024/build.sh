@@ -11,6 +11,8 @@ run_build() {
     if [[ $(validate_day_path $dayPath) == "invalid" ]]; then
         echo "Invalid Path"
         exit 1
+    elif [ ! -f $dayPath/include/DayInput.hpp ]; then
+        cp DayTemplate/include/DayInput.hpp $dayPath/include/DayInput.hpp
     fi
 
     if [ ! -e $path/build ]; then

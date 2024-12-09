@@ -70,9 +70,7 @@ void Day::partA() {
         }
     }
 
-    for(const Position& pos : antinodes) {
-        aSolution++;
-    }
+    aSolution = antinodes.size();
 }
 
 size_t bSolution = 0;
