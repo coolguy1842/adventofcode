@@ -107,28 +107,22 @@ void Day::partB() {
                 const Position& b = frequency.second[frequency.second.size() - (1 + j)];
 
                 size_t xDiff = (long)a.x - (long)b.x, yDiff = (long)a.y - (long)b.y;
-                if(xDiff == 0 && yDiff == 0) {
-                    continue;
-                }
+                if(xDiff == 0 && yDiff == 0) continue;
 
                 Position pos = { a.x, a.y };
-                addPosition(antinodes, gridWidth, gridHeight, Position(pos.x, pos.y));
-                while(pos.x < gridWidth && pos.y < gridWidth) {
-                    addPosition(antinodes, gridWidth, gridHeight, Position(pos.x += xDiff, pos.y += yDiff));
-                }
+                do {
+                    addPosition(antinodes, gridWidth, gridHeight, Position(pos.x, pos.y));
+                } while((pos.x += xDiff) < gridWidth && (pos.y += yDiff) < gridHeight);
 
-                pos = { b.x, b.y };
-                addPosition(antinodes, gridWidth, gridHeight, Position(pos.x, pos.y));
-                while(pos.x < gridWidth && pos.y < gridWidth) {
-                    addPosition(antinodes, gridWidth, gridHeight, Position(pos.x -= xDiff, pos.y -= yDiff));
-                }
+                Position pos2 = { b.x, b.y };
+                do {
+                    addPosition(antinodes, gridWidth, gridHeight, Position(pos2.x, pos2.y));
+                } while((pos2.x -= xDiff) < gridWidth && (pos2.y -= yDiff) < gridHeight);
             }
         }
     }
 
-    for(const Position& pos : antinodes) {
-        bSolution++;
-    }
+    bSolution = antinodes.size();
 }
 
 void Day::printResults(bool partA, bool partB) {
