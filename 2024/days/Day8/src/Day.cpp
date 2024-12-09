@@ -1,5 +1,6 @@
 #include <DayInput.hpp>
 #include <Day.hpp>
+#include <cstdio>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_map>
@@ -27,39 +28,28 @@ inline void addPosition(std::unordered_set<Position, Position>& antinodes, const
     antinodes.emplace(newPos);
 }
 
-void printGrid(const std::vector<std::string>& grid, const std::unordered_set<Position, Position>& antinodes, const size_t& width, const size_t& height, const bool& showAntiOverAntenna) {
-    for(size_t y = 0; y < height; y++) {
-        for(size_t x = 0; x < width; x++) {
-            bool isAntinode = antinodes.contains(Position(x, y));
-            bool isAntenna = grid[y][x] != '.';
-
-            if(isAntinode && isAntenna && showAntiOverAntenna) {
-                printf("#");
-            }
-            else if(isAntinode) {
-                printf("#");
-            }
-            else {
-                printf("%c", grid[y][x]);
-            }
-        }
-
-        printf("\n");
-    }
-}
-
 size_t aSolution = 0;
 void Day::partA() {
-    const std::vector<std::string> grid = input.getSplitText("\n");
+    const char* str = input.text.c_str();
+
     std::unordered_map<char, std::vector<Position>> antenna;
     std::unordered_set<Position, Position> antinodes;
 
-    size_t gridWidth = grid[0].size(), gridHeight = grid.size();
-    for(size_t y = 0; y < gridHeight; y++) {
-        for(size_t x = 0; x < gridWidth; x++) {
-            if(grid[y][x] != '.') {
-                antenna[grid[y][x]].push_back({ x, y });
+    size_t gridWidth = 0, gridHeight, x = 0, y = 0;
+    for(size_t i = 0; i < input.text.size(); i++) {
+        switch(str[i]) {
+        case '.': x++; break;
+        case '\n':
+            if(gridWidth == 0) {
+                gridWidth = i;
+                gridHeight = input.text.size() / gridWidth;
             }
+
+            x = 0;
+            y++;
+            break;
+        default:
+            antenna[str[i]].push_back({ x++, y });
         }
     }
 
@@ -87,16 +77,26 @@ void Day::partA() {
 
 size_t bSolution = 0;
 void Day::partB() {
-    const std::vector<std::string> grid = input.getSplitText("\n");
+    const char* str = input.text.c_str();
+
     std::unordered_map<char, std::vector<Position>> antenna;
     std::unordered_set<Position, Position> antinodes;
 
-    size_t gridWidth = grid[0].size(), gridHeight = grid.size();
-    for(size_t y = 0; y < gridHeight; y++) {
-        for(size_t x = 0; x < gridWidth; x++) {
-            if(grid[y][x] != '.') {
-                antenna[grid[y][x]].push_back({ x, y });
+    size_t gridWidth = 0, gridHeight, x = 0, y = 0;
+    for(size_t i = 0; i < input.text.size(); i++) {
+        switch(str[i]) {
+        case '.': x++; break;
+        case '\n':
+            if(gridWidth == 0) {
+                gridWidth = i;
+                gridHeight = input.text.size() / gridWidth;
             }
+
+            x = 0;
+            y++;
+            break;
+        default:
+            antenna[str[i]].push_back({ x++, y });
         }
     }
 
