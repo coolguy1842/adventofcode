@@ -30,41 +30,35 @@ std::unordered_map<uint64_t, uint64_t> getStones(const std::string& input) {
     return stones;
 }
 
+
+std::vector<uint64_t> getResult(const uint64_t& stone) {
+    uint8_t numLen = quick_log10(stone);
+    if(numLen & 1) {
+        return { stone * 2024 };
+    }
+
+    uint64_t pow10 = quick_pow<10>(numLen / 2);
+    return { stone / pow10, stone % pow10 };
+}
+
 void blink(std::unordered_map<uint64_t, uint64_t>& stones) {
     static std::unordered_map<uint64_t, std::vector<uint64_t>> results;
     
     std::unordered_map<uint64_t, uint64_t> nextStones;
-    for(auto& pair : stones) {
+    for(const auto& pair : stones) {
         const uint64_t& stone = pair.first;
         if(stone == 0) {
             nextStones[1] += pair.second;
             continue;
         }
 
-        top:
-        auto res = results[stone];
-        if(res.size() > 0) {
-            for(const uint64_t& val : res) {
-                nextStones[val] += pair.second;
-            }
-
-            continue;
+        auto& res = results[stone];
+        if(res.size() == 0) {
+            res = getResult(stone);
         }
 
-        uint64_t numLen = log10(stone) + 1;
-        if(numLen % 2 == 0 && numLen > 1) {
-            uint64_t pow10 = quick_pow<10>(numLen / 2);
-            
-            uint64_t lHS = stone / pow10, rHS = stone % pow10;
-            results[stone] = { lHS, rHS };
-            
-            goto top;
-        }
-        else {
-            uint64_t val = pair.first * 2024;
-
-            results[stone] = { val };
-            goto top;
+        for(const uint64_t& val : res) {
+            nextStones[val] += pair.second;
         }
     }
 
