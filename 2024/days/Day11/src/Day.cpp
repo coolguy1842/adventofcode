@@ -37,7 +37,8 @@ std::vector<uint64_t> getResult(const uint64_t& stone) {
         return { stone * 2024 };
     }
 
-    uint64_t pow10 = quick_pow<10>(numLen / 2);
+    // use bitshift to div by 2 for speed
+    uint64_t pow10 = quick_pow<10>(numLen >> 1);
     return { stone / pow10, stone % pow10 };
 }
 
