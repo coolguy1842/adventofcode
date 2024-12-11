@@ -15,6 +15,7 @@ struct _powS<E, 0> {
 };
 
 // from https://stackoverflow.com/a/18596077
+// probably needs a signed version but I'll make that if I need it
 template<uint64_t E, typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 T quick_pow(T n) {
     constexpr static uint64_t powers[] = {
@@ -44,7 +45,7 @@ uint8_t quick_log10(T num) {
     };
 
     const uint8_t approx = digits[num ? __builtin_clzll(num) : 64]; // clz undefined for x=0
-    return approx + (num >= quick_pow<10, uint32_t>(approx));
+    return approx + (num >= quick_pow<10, T>(approx));
 }
 
 
