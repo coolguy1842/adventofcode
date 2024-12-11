@@ -8,15 +8,15 @@
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
-inline std::vector<std::vector<long>> parseNumbers(const std::string& line) {
-    std::vector<std::vector<long>> numbers;
+inline std::vector<std::vector<int64_t>> parseNumbers(const std::string& line) {
+    std::vector<std::vector<int64_t>> numbers;
 
     const char* str = line.c_str();
 
-    long number;
+    int64_t number;
     int read = 0;
     
-    std::vector<long> tempNumbers;
+    std::vector<int64_t> tempNumbers;
     while(sscanf(str, "%ld%n", &number, &read) == 1) {
         tempNumbers.push_back(number);
 
@@ -35,10 +35,10 @@ enum ELevelDirection {
     DECREASING
 };
 
-inline bool isSafe(const std::vector<long>& numbers) {
+inline bool isSafe(const std::vector<int64_t>& numbers) {
     ELevelDirection direction = numbers[0] > numbers[1] ? DECREASING : INCREASING;
     for(size_t i = 0; i < numbers.size() - 1; i++) {
-        const long &left = numbers[i], &right = numbers[i + 1];
+        const int64_t &left = numbers[i], &right = numbers[i + 1];
         
         if(
             (left == right) ||
@@ -53,9 +53,9 @@ inline bool isSafe(const std::vector<long>& numbers) {
 }
 
 
-size_t aSafeReports = 0, bSafeReports = 0;
+int64_t aSafeReports = 0, bSafeReports = 0;
 void Day::partA() {
-    for(const std::vector<long>& numbers : parseNumbers(input.text)) {
+    for(const std::vector<int64_t>& numbers : parseNumbers(input.text)) {
         if(isSafe(numbers)) {
             aSafeReports++;
         }
@@ -63,9 +63,9 @@ void Day::partA() {
 }
 
 void Day::partB() {
-    for(const std::vector<long>& numbers : parseNumbers(input.text)) {
+    for(const std::vector<int64_t>& numbers : parseNumbers(input.text)) {
         for(size_t i = 0; i < numbers.size(); i++) {
-            std::vector<long> tempNumbers = numbers;
+            std::vector<int64_t> tempNumbers = numbers;
             tempNumbers.erase(tempNumbers.begin() + i);
             
             if(isSafe(tempNumbers)) {

@@ -62,7 +62,7 @@ size_t partFunc(const std::string& diskMapStr, const bool& partA) {
         }
     }
 
-    size_t block = 0, out = 0;
+    uint64_t block = 0, out = 0;
     for(size_t i = 0; i < diskMap.size(); i++) {
         FileInfo& info = diskMap[i];
         if(info.id == -1) {
@@ -78,7 +78,7 @@ size_t partFunc(const std::string& diskMapStr, const bool& partA) {
     return out;
 }
 
-size_t aSolution = 0, bSolution = 0;
+uint64_t aSolution = 0, bSolution = 0;
 void Day::partA() { aSolution = partFunc(input.text, true ); }
 void Day::partB() { bSolution = partFunc(input.text, false); }
 

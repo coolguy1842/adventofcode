@@ -11,7 +11,7 @@
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
-size_t aSolution = 0;
+uint64_t aSolution = 0;
 void Day::partA() {
     INIT_VARS()
     
@@ -36,7 +36,7 @@ void Day::partA() {
     }
 }
 
-size_t bSolution = 0;
+uint64_t bSolution = 0;
 void Day::partB() {
     INIT_VARS()
     

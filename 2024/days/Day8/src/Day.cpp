@@ -10,7 +10,7 @@
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
 struct Position {
-    size_t x, y;
+    uint64_t x, y;
 
     inline std::size_t operator()(const Position& c) const {
         return (c.x << 32) + c.y;
@@ -21,21 +21,21 @@ struct Position {
     }
 };
 
-inline void addPosition(std::unordered_set<Position, Position>& antinodes, const size_t& gridWidth, const size_t& gridHeight, const Position& newPos) {
+inline void addPosition(std::unordered_set<Position, Position>& antinodes, const uint64_t& gridWidth, const uint64_t& gridHeight, const Position& newPos) {
     if(newPos.x >= gridWidth) return;
     else if(newPos.y >= gridHeight) return;
 
     antinodes.emplace(newPos);
 }
 
-size_t aSolution = 0;
+uint64_t aSolution = 0;
 void Day::partA() {
     const char* str = input.text.c_str();
 
     std::unordered_map<char, std::vector<Position>> antenna;
     std::unordered_set<Position, Position> antinodes;
 
-    size_t gridWidth = 0, gridHeight, x = 0, y = 0;
+    uint64_t gridWidth = 0, gridHeight, x = 0, y = 0;
     for(size_t i = 0; i < input.text.size(); i++) {
         switch(str[i]) {
         case '.': x++; break;
@@ -59,7 +59,7 @@ void Day::partA() {
             for(size_t j = 0; j <= frequency.second.size() / 2; j++) {
                 const Position& b = frequency.second[frequency.second.size() - (1 + j)];
 
-                size_t xDiff = (long)a.x - (long)b.x, yDiff = (long)a.y - (long)b.y;
+                uint64_t xDiff = (long)a.x - (long)b.x, yDiff = (long)a.y - (long)b.y;
                 if(xDiff == 0 && yDiff == 0) {
                     continue;
                 }
@@ -73,14 +73,14 @@ void Day::partA() {
     aSolution = antinodes.size();
 }
 
-size_t bSolution = 0;
+uint64_t bSolution = 0;
 void Day::partB() {
     const char* str = input.text.c_str();
 
     std::unordered_map<char, std::vector<Position>> antenna;
     std::unordered_set<Position, Position> antinodes;
 
-    size_t gridWidth = 0, gridHeight, x = 0, y = 0;
+    uint64_t gridWidth = 0, gridHeight, x = 0, y = 0;
     for(size_t i = 0; i < input.text.size(); i++) {
         switch(str[i]) {
         case '.': x++; break;
@@ -104,7 +104,7 @@ void Day::partB() {
             for(size_t j = 0; j <= frequency.second.size() / 2; j++) {
                 const Position& b = frequency.second[frequency.second.size() - (1 + j)];
 
-                size_t xDiff = (long)a.x - (long)b.x, yDiff = (long)a.y - (long)b.y;
+                uint64_t xDiff = (long)a.x - (long)b.x, yDiff = (long)a.y - (long)b.y;
                 if(xDiff == 0 && yDiff == 0) continue;
 
                 Position pos = { a.x, a.y };

@@ -9,10 +9,10 @@
 
 Day::Day() : AOCUtil::IDay(dayInput) {} 
 
-size_t partFunc(const std::string& str, bool partB = false) {
+uint64_t partFunc(const std::string& str, bool partB = false) {
     const char *strPtr = str.c_str(), *ptr = strPtr - 1;
     
-    size_t out = 0;
+    uint64_t out = 0;
     bool acceptMuls = true;
 
     while((ptr = strstr(ptr + 1, "("))) {
@@ -23,10 +23,10 @@ size_t partFunc(const std::string& str, bool partB = false) {
             acceptMuls = false;
         }
         else if(acceptMuls && strncmp(ptr - 3, "mul", 3) == 0) {
-            size_t left, right;
+            uint64_t left, right;
             char endChar;
 
-            if(sscanf(ptr + 1, "%zu,%zu%c", &left, &right, &endChar) == 3 && endChar == ')') {
+            if(sscanf(ptr + 1, "%lu,%lu%c", &left, &right, &endChar) == 3 && endChar == ')') {
                 out += left * right;
             }
         }
@@ -35,7 +35,7 @@ size_t partFunc(const std::string& str, bool partB = false) {
     return out;
 }
 
-size_t aSolution = 0, bSolution = 0;
+uint64_t aSolution = 0, bSolution = 0;
 void Day::partA() { aSolution = partFunc(input.text); }
 void Day::partB() { bSolution = partFunc(input.text, true); }
 

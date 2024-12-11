@@ -43,8 +43,9 @@ std::vector<uint64_t> getResult(const uint64_t& stone) {
 
 void blink(std::unordered_map<uint64_t, uint64_t>& stones) {
     static std::unordered_map<uint64_t, std::vector<uint64_t>> results;
-    
-    std::unordered_map<uint64_t, uint64_t> nextStones;
+    static std::unordered_map<uint64_t, uint64_t> nextStones;
+
+    nextStones.clear();
     for(const auto& pair : stones) {
         const uint64_t& stone = pair.first;
         if(stone == 0) {

@@ -29,7 +29,7 @@ enum GridType {
 };
 
 struct Grid {
-    size_t width, height;
+    uint64_t width, height;
     GridType* data;
 
     Guard guard;
@@ -85,7 +85,7 @@ struct Grid {
     }
 };
 
-size_t aSolution = 0;
+uint64_t aSolution = 0;
 void Day::partA() {
     Grid grid(input.text);
 
@@ -101,7 +101,7 @@ void Day::partA() {
     free(visited);
 }
 
-size_t bSolution = 0;
+uint64_t bSolution = 0;
 void Day::partB() {
     Grid grid(input.text);
     size_t guardPos = grid.guard.pos;
@@ -122,7 +122,7 @@ void Day::partB() {
             grid.guard.pos = guardPos;
             grid.guard.dir = UP;
             
-            size_t steps = 0;
+            uint64_t steps = 0;
             while(grid.stepGuard()) {
                 // this might need adjusting depending on input
                 if(steps++ > MAX_LOOP_STEPS) {

@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include <vector>
 
-void initRules(const std::vector<std::string>& input, std::unordered_map<size_t, std::unordered_set<size_t>>& rules, std::vector<std::vector<size_t>>& updates) {
+void initRules(const std::vector<std::string>& input, std::unordered_map<uint64_t, std::unordered_set<uint64_t>>& rules, std::vector<std::vector<uint64_t>>& updates) {
     bool doRules = true;
     for(const std::string& str : input) {
         if(str.size() == 0) {
@@ -17,8 +17,8 @@ void initRules(const std::vector<std::string>& input, std::unordered_map<size_t,
         }
 
         if(doRules) {
-            size_t left, right;
-            sscanf(str.c_str(), "%zu|%zu", &left, &right);
+            uint64_t left, right;
+            sscanf(str.c_str(), "%lu|%lu", &left, &right);
 
             rules[left].emplace(right);
         }
@@ -26,11 +26,11 @@ void initRules(const std::vector<std::string>& input, std::unordered_map<size_t,
             const char* strPtr = str.c_str();
             char c;
 
-            size_t num;
+            uint64_t num;
             int read;
             
-            std::vector<size_t> update;
-            while(sscanf(strPtr, "%zu%c%n", &num, &c, &read) == 2) {
+            std::vector<uint64_t> update;
+            while(sscanf(strPtr, "%lu%c%n", &num, &c, &read) == 2) {
                 update.push_back(num);
 
                 strPtr += read;
@@ -42,12 +42,12 @@ void initRules(const std::vector<std::string>& input, std::unordered_map<size_t,
     }
 }
 
-bool isCorrect(const std::unordered_map<size_t, std::unordered_set<size_t>>& rules, const std::vector<size_t>& update) {
+bool isCorrect(const std::unordered_map<uint64_t, std::unordered_set<uint64_t>>& rules, const std::vector<uint64_t>& update) {
     for(size_t i = 0; i < update.size(); i++) {
-        const size_t& before = update[i];
+        const uint64_t& before = update[i];
 
         for(size_t j = i + 1; j < update.size(); j++) {
-            const size_t& after = update[j];
+            const uint64_t& after = update[j];
 
             if(rules.contains(after) && rules.at(after).contains(before)) {
                 return false;
@@ -61,33 +61,33 @@ bool isCorrect(const std::unordered_map<size_t, std::unordered_set<size_t>>& rul
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
-size_t aSolution = 0;
+uint64_t aSolution = 0;
 void Day::partA() {
-    std::unordered_map<size_t, std::unordered_set<size_t>> rules;
-    std::vector<std::vector<size_t>> updates;
+    std::unordered_map<uint64_t, std::unordered_set<uint64_t>> rules;
+    std::vector<std::vector<uint64_t>> updates;
 
     initRules(input.getSplitText("\n"), rules, updates);
 
-    for(const std::vector<size_t>& update : updates) {
+    for(const std::vector<uint64_t>& update : updates) {
         if(isCorrect(rules, update)) {
             aSolution += update[update.size() / 2];
         }
     }
 }
 
-size_t bSolution = 0;
+uint64_t bSolution = 0;
 void Day::partB() {
-    std::unordered_map<size_t, std::unordered_set<size_t>> rules;
-    std::vector<std::vector<size_t>> updates;
+    std::unordered_map<uint64_t, std::unordered_set<uint64_t>> rules;
+    std::vector<std::vector<uint64_t>> updates;
 
     initRules(input.getSplitText("\n"), rules, updates);
 
-    for(std::vector<size_t>& update : updates) {
+    for(std::vector<uint64_t>& update : updates) {
         if(isCorrect(rules, update)) {
             continue;
         }
 
-        std::sort(update.begin(), update.end(), [&rules](size_t& a, size_t& b) {
+        std::sort(update.begin(), update.end(), [&rules](uint64_t& a, uint64_t& b) {
             return !rules[b].contains(a);
         });
 

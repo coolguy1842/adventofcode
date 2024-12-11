@@ -28,28 +28,6 @@ T quick_pow(T n) {
     return lookupTable[n];
 }
 
-
-// inline uint64_t baseTwoDigits(const uint64_t& x) {
-//     return x ? 32 - __builtin_clz(x) : 0;
-// }
-
-// inline uint64_t quick_log10(const uint64_t& x) {
-//     static const unsigned char guess[33] = {
-//         0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
-//         3, 3, 3, 3, 4, 4, 4, 5, 5, 5,
-//         6, 6, 6, 6, 7, 7, 7, 8, 8, 8,
-//         9, 9, 9
-//     };
-
-//     static const uint64_t tenToThe[] = {
-//         1, 10, 100, 1000, 10000, 100000, 
-//         1000000, 10000000, 100000000, 1000000000,
-//     };
-    
-//     uint64_t digits = guess[baseTwoDigits(x)];
-//     return digits + (x >= tenToThe[digits]);
-// }
-
 // from https://stackoverflow.com/a/25934909, http://coliru.stacked-crooked.com/a/16f8a901a31b9d73
 template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 uint8_t baseTwoDigits(T num) {
