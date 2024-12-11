@@ -1,120 +1,63 @@
 #include <DayInput.hpp>
 #include <Day.hpp>
+#include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <list>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <unordered_set>
-#include <vector>
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
-struct Position {
-    long x, y;
-
-    inline std::size_t operator()(const Position& c) const {
-        return (c.x << 32) + c.y;
+void getPaths(const char* grid, const size_t& width, const size_t& gridSize, std::list<size_t>& endPositions, size_t pos) {
+    if(grid[pos] == '9') {
+        endPositions.push_back(pos);
+        return;
     }
 
-    bool operator==(const Position& other) const {
-        return x == other.x && y == other.y;
-    }
-};
+    // newlines cause + 1 needed
+    const int64_t posOffsets[] = { 1, -1, static_cast<int64_t>(width + 1), -static_cast<int64_t>(width + 1) };
+    const char nextChar = grid[pos] + 1;
 
-typedef std::vector<std::string> TGrid;
-
-std::vector<Position> directions = { Position(-1, 0), Position(1, 0), Position(0, -1), Position(0, 1) };
-std::vector<Position> getNeighbours(const TGrid& grid, const Position& pos) {
-    const char nextChar = grid[pos.y][pos.x] + 1;
-
-    std::vector<Position> out;
-    for(const Position& dir : directions) {
-        Position nextPos = Position(pos.x + dir.x, pos.y + dir.y);
-        if(nextPos.x < 0 || nextPos.x >= grid[0].size() || nextPos.y < 0 || nextPos.y >= grid.size()) {
-            continue;
+    for(const int64_t& offset : posOffsets) {
+        const size_t neighbour = pos + offset;
+        // no x wrapping check needed as itll find a new line char code, lucky
+        if(neighbour < gridSize && grid[neighbour] == nextChar) {
+            getPaths(grid, width, gridSize, endPositions, neighbour);
         }
+    }
+}
 
-        const char& next = grid[nextPos.y][nextPos.x];
-        if(next == nextChar) {
-            out.push_back(Position(nextPos.x, nextPos.y));
+uint64_t partFunc(const std::string& input, const bool& partA) {
+    uint64_t out = 0;
+
+    const char* grid = input.c_str();
+    const size_t& gridSize = input.size();
+    const size_t width = strpbrk(grid, "\n") - grid, height = gridSize / width;
+
+    std::list<size_t> endPositions;
+    for(size_t i = 0; i < gridSize; i++) {
+        if(grid[i] == '0') {
+            getPaths(grid, width, gridSize, endPositions, i);
+
+            if(partA) {
+                endPositions.sort();
+                endPositions.unique();
+            }
+
+            out += endPositions.size();
+            endPositions.clear();
         }
     }
 
     return out;
 }
 
-
-size_t getPaths(const TGrid& grid, std::unordered_set<Position, Position>& trailHeadScores, Position pos) {
-    while(grid[pos.y][pos.x] != '9') {
-        std::vector<Position> neighbours = getNeighbours(grid, pos);
-        switch(neighbours.size()) {
-        case 0: return 0;
-        case 1: pos = neighbours[0]; break;
-        default:
-            size_t out = 0;
-            for(const Position& neighbour : neighbours) {
-                out += getPaths(grid, trailHeadScores, neighbour);
-            }
-
-            return out;
-        }
-    }
-
-    trailHeadScores.emplace(pos);
-    return 1;
-}
-
-size_t getPathsB(const TGrid& grid, std::list<Position>& trailHeadScores, Position pos) {
-    while(grid[pos.y][pos.x] != '9') {
-        std::vector<Position> neighbours = getNeighbours(grid, pos);
-        switch(neighbours.size()) {
-        case 0: return 0;
-        case 1: pos = neighbours[0]; break;
-        default:
-            size_t out = 0;
-            for(const Position& neighbour : neighbours) {
-                out += getPathsB(grid, trailHeadScores, neighbour);
-            }
-
-            return out;
-        }
-    }
-
-    trailHeadScores.push_back(pos);
-    return 1;
-}
-
-size_t aSolution = 0;
-void Day::partA() {
-    TGrid grid = input.getSplitText("\n");
-    
-    for(size_t y = 0; y < grid.size(); y++) {
-        for(size_t x = 0; x < grid[0].size(); x++) {
-            if(grid[y][x] == '0') {
-                std::unordered_set<Position, Position> endPositions;
-                getPaths(grid, endPositions, Position(x, y));
-
-                aSolution += endPositions.size();
-            }
-        }
-    }
-}
-
-uint64_t bSolution = 0;
-void Day::partB() {
-    TGrid grid = input.getSplitText("\n");
-    
-    for(size_t y = 0; y < grid.size(); y++) {
-        for(size_t x = 0; x < grid[0].size(); x++) {
-            if(grid[y][x] == '0') {
-                std::list<Position> endPositions;
-                getPathsB(grid, endPositions, Position(x, y));
-
-                bSolution += endPositions.size();
-            }
-        }
-    }
-}
+uint64_t aSolution = 0, bSolution = 0;
+void Day::partA() { aSolution = partFunc(input.text, true); }
+void Day::partB() { bSolution = partFunc(input.text, false); }
 
 void Day::printResults(bool partA, bool partB) {
     if(partA) spdlog::info("Part A: {}", aSolution);
