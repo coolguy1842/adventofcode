@@ -25,79 +25,8 @@ struct Position {
 
 struct PlotInfo {
     uint64_t area;
-    uint64_t perimeter;
+    uint64_t other;
 };
-
-PlotInfo getPlotInfo(const std::vector<std::string>& grid, bool** visited, Position pos) {
-    constexpr static Position directions[] = { Position(-1, 0), Position(1, 0), Position(0, -1), Position(0, 1)  };
-    PlotInfo info = { 0, 0 };
-
-    visited[pos.y][pos.x] = true;
-    const char& gardenChar = grid[pos.y][pos.x];
-
-    for(Position dir : directions) {
-        Position neighbourPos = Position(pos.x + dir.x, pos.y + dir.y);
-        if(neighbourPos.x >= grid[0].size() || neighbourPos.y >= grid.size()) {
-            info.perimeter++;
-
-            continue;
-        }
-
-        const char& neighbourChar = grid[neighbourPos.y][neighbourPos.x];
-        const bool& isVisited = visited[neighbourPos.y][neighbourPos.x];
-
-        if(gardenChar == neighbourChar) {
-            if(isVisited) {
-                continue;
-            }
-            
-            info.area++;
-
-            visited[neighbourPos.y][neighbourPos.x] = true;
-            PlotInfo neighbourInfo = getPlotInfo(grid, visited, neighbourPos);
-
-            info.area += neighbourInfo.area;
-            info.perimeter += neighbourInfo.perimeter;
-
-            continue;
-        }
-
-        info.perimeter++;
-    }
-
-    return info;
-}
-
-size_t aSolution = 0;
-void Day::partA() {
-    const std::vector<std::string>& grid = input.getSplitText("\n");
-    const size_t &width = grid[0].size(), &height = grid.size();
-
-    bool** visited = new bool*[height];
-    for(size_t i = 0; i < height; i++) {
-        visited[i] = new bool[width];
-        memset(visited[i], false, width * sizeof(bool));
-    }
-
-    for(size_t i = 0; i < height; i++) {
-        for(size_t j = 0; j < width; j++) {
-            if(visited[i][j]) {
-                continue;
-            }
-
-            PlotInfo info = getPlotInfo(grid, visited, Position(j, i));
-            info.area += 1;
-            aSolution += info.area * info.perimeter;
-        }
-    }
-
-    for(int i = 0; i < height; ++i) {
-        delete[] visited[i];
-    }
-
-    delete[] visited;
-}
-
 
 enum Side {
     NONE   = 0,
@@ -107,59 +36,54 @@ enum Side {
     RIGHT  = (1 << 3)
 };
 
-struct PlotInfoB {
-    uint64_t area;
-    uint64_t sides;
-};
-
-PlotInfoB getPlotInfoB(const std::vector<std::string>& grid, bool** visited, Position pos, std::unordered_map<Position, uint64_t, Position>& sides) {
+PlotInfo getPlotInfo(const std::vector<std::string>& grid, bool** visited, Position pos, std::unordered_map<Position, uint64_t, Position>& sides, const bool& partA) {
     constexpr static Position directions[] = { Position(0, -1), Position(-1, 0), Position(0, 1), Position(1, 0) };
-    PlotInfoB info = { 0, 0 };
+    PlotInfo info = { 0, 0 };
 
     visited[pos.y][pos.x] = true;
     const char& gardenChar = grid[pos.y][pos.x];
     
-    sides[pos] = NONE;
-    size_t edges = 0;
-
+    if(!partA) {
+        sides[pos] = NONE;
+    }
+    
+    size_t sideEdges = 0;
     for(size_t i = 0; i < 4; i++) {
         const Position& dir = directions[i];
 
         Position neighbourPos = Position(pos.x + dir.x, pos.y + dir.y);
-        if(neighbourPos.x >= grid[0].size() || neighbourPos.y >= grid.size()) {
-            goto assignSide;
-        }
-
-        {
-            const char& neighbourChar = grid[neighbourPos.y][neighbourPos.x];
-            const bool& isVisited = visited[neighbourPos.y][neighbourPos.x];
-
-            if(gardenChar == neighbourChar) {
+        if(neighbourPos.x < grid[0].size() && neighbourPos.y < grid.size()) {
+            if(gardenChar == grid[neighbourPos.y][neighbourPos.x]) {
+                bool& isVisited = visited[neighbourPos.y][neighbourPos.x];
                 if(isVisited) {
                     continue;
                 }
                 
                 info.area++;
 
-                visited[neighbourPos.y][neighbourPos.x] = true;
-                PlotInfoB neighbourInfo = getPlotInfoB(grid, visited, neighbourPos, sides);
+                isVisited = true;
+                PlotInfo neighbourInfo = getPlotInfo(grid, visited, neighbourPos, sides, partA);
 
                 info.area += neighbourInfo.area;
-                info.sides += neighbourInfo.sides;
+                info.other += neighbourInfo.other;
 
                 continue;
             }
         }
 
-        assignSide:
-        if(sides.find(pos) == sides.end()) {
-            sides[pos] = (1 << i);
+        sideEdges++;
+        
+        if(partA) {
+            info.other++;
         }
         else {
-            sides[pos] |= (1 << i);
+            if(sides.find(pos) == sides.end()) {
+                sides[pos] = (1 << i);
+            }
+            else {
+                sides[pos] |= (1 << i);
+            }
         }
-
-        skip:
     }
 
     return info;
@@ -253,6 +177,37 @@ bool doSide(const std::vector<std::string>& grid, std::unordered_map<Position, u
 }
 
 
+size_t aSolution = 0;
+void Day::partA() {
+    const std::vector<std::string>& grid = input.getSplitText("\n");
+    const size_t &width = grid[0].size(), &height = grid.size();
+
+    bool** visited = new bool*[height];
+    for(size_t i = 0; i < height; i++) {
+        visited[i] = new bool[width];
+        memset(visited[i], false, width * sizeof(bool));
+    }
+
+    std::unordered_map<Position, uint64_t, Position> sides;
+    for(size_t i = 0; i < height; i++) {
+        for(size_t j = 0; j < width; j++) {
+            if(visited[i][j]) {
+                continue;
+            }
+
+            PlotInfo info = getPlotInfo(grid, visited, Position(j, i), sides, true);
+            info.area += 1;
+            aSolution += info.area * info.other;
+        }
+    }
+
+    for(int i = 0; i < height; ++i) {
+        delete[] visited[i];
+    }
+
+    delete[] visited;
+}
+
 size_t bSolution = 0;
 void Day::partB() {
     const std::vector<std::string>& grid = input.getSplitText("\n");
@@ -271,19 +226,19 @@ void Day::partB() {
             }
 
             std::unordered_map<Position, uint64_t, Position> sides;
-            PlotInfoB info = getPlotInfoB(grid, visited, Position(j, i), sides);
+            PlotInfo info = getPlotInfo(grid, visited, Position(j, i), sides, false);
 
             while(sides.size()) {
                 auto side = sides.begin();
 
-                info.sides += doSide(grid, sides, side->first, TOP);;
-                info.sides += doSide(grid, sides, side->first, LEFT);
-                info.sides += doSide(grid, sides, side->first, BOTTOM);
-                info.sides += doSide(grid, sides, side->first, RIGHT);
+                info.other += doSide(grid, sides, side->first, TOP);;
+                info.other += doSide(grid, sides, side->first, LEFT);
+                info.other += doSide(grid, sides, side->first, BOTTOM);
+                info.other += doSide(grid, sides, side->first, RIGHT);
             }
 
             info.area += 1;
-            bSolution += info.area * info.sides;
+            bSolution += info.area * info.other;
         }
     }
 
