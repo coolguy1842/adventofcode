@@ -7,6 +7,13 @@
 #include <spdlog/spdlog.h>
 #include <vector>
 
+#define WIDTH 101
+#define HEIGHT 103
+
+#define HALF_WIDTH WIDTH / 2
+#define HALF_HEIGHT HEIGHT / 2
+
+
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
 struct Robot {
@@ -21,37 +28,28 @@ struct Robot {
     } velocity;
 };
 
-int64_t mod(int64_t a, int64_t b) {
-    int64_t result = a % b;
-    if(result < 0) {
-        result += b;
-    }
-
-    return result;
-}
-
 uint64_t aSolution = 0;
 void Day::partA() {
+#define SECONDS 100
     const char* str = input.text.c_str();
 
     uint64_t quadrants[4];
     memset(quadrants, 0, sizeof(quadrants));
-
-    uint64_t width = 101, height = 103;
-    uint64_t halfWidth = width / 2, halfHeight = height / 2;
 
     Robot robot;
     int read = 0;
     do {
         sscanf(str, "p=%ld,%ld v=%ld,%ld\n%n", &robot.position.x, &robot.position.y, &robot.velocity.x, &robot.velocity.y, &read);
 
-        robot.position.x = mod(robot.position.x + (robot.velocity.x * 100), width);
-        robot.position.y = mod(robot.position.y + (robot.velocity.y * 100), height);
-        if(robot.position.x == halfWidth || robot.position.y == halfHeight) {
+        // offset by width and height to prevent negative output from modulo: suggestion from u/wurlin_murlin https://www.reddit.com/r/adventofcode/comments/1hdvhvu/comment/m2306c7
+        robot.position.x = (robot.position.x + (100 * (robot.velocity.x + WIDTH))) % WIDTH;
+        robot.position.y = (robot.position.y + (100 * (robot.velocity.y + HEIGHT))) % HEIGHT;
+        if(robot.position.x == HALF_WIDTH || robot.position.y == HALF_HEIGHT) {
             continue;
         }
 
-        quadrants[((robot.position.y > halfHeight) * 2) + (robot.position.x > halfWidth)]++;
+        // y quadrant shifts over by 1 to put in the 2s place then combine with the x quadrant with or
+        quadrants[((robot.position.y > HALF_HEIGHT) << 1) | (robot.position.x > HALF_WIDTH)]++;
     } while(*(str += read));
 
     aSolution = quadrants[0] * quadrants[1] * quadrants[2] * quadrants[3];
@@ -61,28 +59,30 @@ uint64_t bSolution = 0;
 void Day::partB() {
     const char* str = input.text.c_str();
 
-    std::vector<Robot> robots;
+    // for some reason using the defined WIDTH and HEIGHT makes it run slower so create the variables here
+    uint64_t width = 101;
+    uint64_t height = 103;
 
-    uint64_t width = 101, height = 103;
-    uint64_t distinctRobots[height + 1][width + 1];
-    for(uint64_t* row : distinctRobots) {
-        memset(row, -1, width * sizeof(uint64_t));
-    }
+    std::vector<Robot> robots;
+    uint32_t distinctRobots[height * width];
 
     Robot robot;
     int read = 0;
     do {
         sscanf(str, "p=%ld,%ld v=%ld,%ld\n%n", &robot.position.x, &robot.position.y, &robot.velocity.x, &robot.velocity.y, &read);
+        robot.velocity.x += width;
+        robot.velocity.y += height;
+
         robots.push_back(robot);
     } while(*(str += read));
 
-    uint64_t i = -1;
+    uint32_t i = -1;
     bool isDistributed = false;
     while(!isDistributed) {
         isDistributed = true;
         for(Robot& robot : robots) {
             if(isDistributed) {
-                uint64_t& pos = distinctRobots[robot.position.y][robot.position.x];
+                uint32_t& pos = distinctRobots[(robot.position.y * width) + robot.position.x];
                 if(pos == i) {
                     isDistributed = false;
                 }
@@ -91,8 +91,8 @@ void Day::partB() {
                 }
             }
 
-            robot.position.x = mod(robot.position.x + robot.velocity.x, width);
-            robot.position.y = mod(robot.position.y + robot.velocity.y, height);
+            robot.position.x = (robot.position.x + robot.velocity.x) % width;
+            robot.position.y = (robot.position.y + robot.velocity.y) % height;
         }
 
         i++;
