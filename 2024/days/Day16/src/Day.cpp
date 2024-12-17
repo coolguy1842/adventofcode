@@ -38,27 +38,9 @@ struct Node {
     Direction direction;
 
     uint64_t score;
-    std::unordered_set<uint64_t> path;
 
     auto operator<=>(const Node& other) const { return score <=> other.score; }
 };
-
-void printPath(const GridObject* grid, const uint64_t& width, const uint64_t& height, std::unordered_set<uint64_t> path) {
-    for(size_t i = 0; i < width * height; i++) {
-        if(i % width == 0) {
-            printf("\n");
-        }
-
-        if(path.contains(i)) {
-            printf("*");
-        }
-        else {
-            printf("%c", grid[i].type);
-        }
-    }
-
-    printf("\n");
-}
 
 // dijkstra algorithm
 std::optional<uint64_t> findPath(GridObject* grid, const uint64_t& width, const uint64_t& height, const uint64_t& start, const uint64_t& end) {
@@ -94,45 +76,54 @@ std::optional<uint64_t> findPath(GridObject* grid, const uint64_t& width, const 
 }
 
 
+struct NodeB {
+    uint64_t position;
+    Direction direction;
+
+    uint64_t score;
+    std::vector<uint64_t> path;
+
+    auto operator<=>(const NodeB& other) const { return score <=> other.score; }
+};
+
 std::optional<uint64_t> findPathB(GridObject* grid, const uint64_t& width, const uint64_t& height, const uint64_t& start, const uint64_t& end) {
     const static uint64_t directionOffsets[] = { -width, 1LU, width, -1LU };
-    std::priority_queue<Node, std::vector<Node>, std::greater<>> queue;
+    std::priority_queue<NodeB, std::vector<NodeB>, std::greater<>> queue;
 
     queue.push({ start, EAST, 0, { start } });
     std::optional<uint64_t> bestScore;
     std::unordered_set<uint64_t> tiles;
 
     while(!queue.empty()) {
-        const Node top = queue.top();
+        NodeB top = queue.top();
         queue.pop();
 
+        top.path.push_back(top.position);
         if(top.position == end) {
             if(bestScore.has_value() && bestScore.value() < top.score) {
                 break;
             }
 
-            for(uint64_t tile : top.path) {
+            for(const uint64_t& tile : top.path) {
                 tiles.insert(tile);
             }
 
             bestScore = top.score;
+            continue;
         }
-
-        std::unordered_set<uint64_t> path = top.path;
-        path.insert(top.position);
 
         for(uint64_t i = NORTH; i <= WEST; i++) {
             const uint64_t offsetPosition = top.position + directionOffsets[i];
+            const uint64_t newScore = top.score + 1 + ((top.direction != i) * 1000);
 
             GridObject& obj = grid[offsetPosition];
-            uint64_t newScore = top.score + 1 + ((top.direction != i) * 1000);
 
             if(obj.type == WALL || newScore > obj.minScores[i]) {
                 continue;
             }
 
             obj.minScores[i] = newScore;
-            queue.push({ offsetPosition, (Direction)i, newScore, path });
+            queue.push({ offsetPosition, (Direction)i, newScore, top.path });
         }
     }
 
@@ -140,7 +131,6 @@ std::optional<uint64_t> findPathB(GridObject* grid, const uint64_t& width, const
         return std::nullopt;
     }
 
-    printPath(grid, width, height, tiles);
     return tiles.size();
 }
 
@@ -200,7 +190,7 @@ void Day::printResults(bool partA, bool partB) {
             spdlog::info("Part B: No path found.");
         }
         else {
-            spdlog::info("Part B: {}", bSolution.value() + 1);
+            spdlog::info("Part B: {}", bSolution.value());
         }
     }
 }
