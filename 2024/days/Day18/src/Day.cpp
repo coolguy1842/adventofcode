@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
+#include <limits>
 #include <optional>
 #include <queue>
 #include <spdlog/spdlog.h>
@@ -74,39 +75,36 @@ std::optional<uint64_t> findPath(GridObject* grid, const uint64_t& width, const 
     return std::nullopt;
 }
 
+inline uint64_t addByte(const std::vector<std::string>& split, GridObject* grid, const uint64_t& width, const uint64_t& byte) {
+    uint64_t x, y;
+    sscanf(split[byte].c_str(), "%lu,%lu", &x, &y);
+
+    const uint64_t coords = (y * width) + x;
+    // offset for array padding
+    GridObject& obj = grid[coords + width + 1];
+    obj.type = CORRUPTED;
+
+    return coords;
+};
+
+inline GridObject* createGrid(const std::vector<std::string>& corruptedBytes, const uint64_t& width, const uint64_t& height, const uint64_t& maxBytes) {
+    GridObject* grid = (GridObject*)calloc(WIDTH * HEIGHT, sizeof(GridObject));
+    for(uint64_t i = 0; i < HEIGHT * WIDTH; i++) {
+        // add border around array
+        grid[i] = { (GridType)!((i / WIDTH) % (HEIGHT - 1) != 0 && (i % WIDTH) % (WIDTH - 1) != 0), std::numeric_limits<uint64_t>::max() };
+    }
+
+    for(uint64_t byte = 0; byte < MAX_BYTES; byte++) {
+        addByte(corruptedBytes, grid, WIDTH, byte);
+    }
+
+    return grid;
+}
+
+
 std::optional<uint64_t> aSolution;
 void Day::partA() {
-    GridObject* grid = (GridObject*)calloc(WIDTH * HEIGHT, sizeof(GridObject));
-    for(uint64_t y = 0; y < HEIGHT; y++) {
-        for(uint64_t x = 0; x < WIDTH; x++) {
-            GridObject& obj = grid[(y * WIDTH) + x];
-
-            if(y % (HEIGHT - 1) != 0 && x % (WIDTH - 1) != 0) {
-                obj.type = EMPTY;
-                obj.minScore = UINT64_MAX;
-
-                continue;
-            }
-
-            obj.type = CORRUPTED;
-        }
-    }
-
-    uint64_t byte = 0;
-
-    const std::vector<std::string>& split = input.getSplitText("\n");
-    for(const std::string& coordinates : split) {
-        uint64_t x, y;
-        sscanf(coordinates.c_str(), "%lu,%lu", &x, &y);
-
-        GridObject& obj = grid[((y + 1) * WIDTH) + x + 1];
-        obj.type = CORRUPTED;
-
-        if(++byte >= MAX_BYTES) {
-            break;
-        }
-    }
-
+    GridObject* grid = createGrid(input.getSplitText("\n"), WIDTH, HEIGHT, MAX_BYTES);
     aSolution = findPath(grid, WIDTH, WIDTH + 1, ((HEIGHT * WIDTH) - WIDTH) - 2);
 
     free(grid);
@@ -114,56 +112,21 @@ void Day::partA() {
 
 char bSolution[256];
 void Day::partB() {
-
-    GridObject* grid = (GridObject*)calloc(WIDTH * HEIGHT, sizeof(GridObject));
-    for(uint64_t y = 0; y < HEIGHT; y++) {
-        for(uint64_t x = 0; x < WIDTH; x++) {
-            GridObject& obj = grid[(y * WIDTH) + x];
-
-            if(y % (HEIGHT - 1) != 0 && x % (WIDTH - 1) != 0) {
-                obj.type = EMPTY;
-                obj.minScore = UINT64_MAX;
-
-                continue;
-            }
-
-            obj.type = CORRUPTED;
-        }
-    }
-
-    uint64_t byte = 0;
-
     const std::vector<std::string>& split = input.getSplitText("\n");
 
-    uint64_t cutoffByte = MAX_BYTES;
-    std::optional<uint64_t> steps;
-
-    auto addByte = [&grid, &split](uint64_t byte) {
-        uint64_t x, y;
-        sscanf(split[byte].c_str(), "%lu,%lu", &x, &y);
-
-        const uint64_t coords = ((y + 1) * WIDTH) + x + 1;
-        GridObject& obj = grid[coords];
-        obj.type = CORRUPTED;
-
-        return coords;
-    };
-
-    for(uint64_t byte = 0; byte <= MAX_BYTES; byte++) {
-        addByte(byte);
-    }
+    GridObject* grid = createGrid(split, WIDTH, HEIGHT, MAX_BYTES);
+    uint64_t cutoffByte = MAX_BYTES + 1;
 
     while(true) {
         for(size_t i = 0; i < WIDTH * HEIGHT; i++) {
             grid[i].minScore = UINT64_MAX;
         }
 
-        uint64_t coords = addByte(cutoffByte++);
-
+        uint64_t coords = addByte(split, grid, WIDTH, cutoffByte++);
         if(!findPath(grid, WIDTH, WIDTH + 1, ((HEIGHT * WIDTH) - WIDTH) - 2).has_value()) {
-            int wrote = AOCUtil::numerictostr((coords % WIDTH) - 1, bSolution);
-            bSolution[wrote] = ',';
-            AOCUtil::numerictostr((coords / WIDTH) - 1, bSolution + wrote + 1);
+            int wrote = AOCUtil::numerictostr((coords % WIDTH), bSolution);
+            bSolution[wrote++] = ',';
+            AOCUtil::numerictostr((coords / WIDTH), bSolution + wrote);
 
             break;
         }
