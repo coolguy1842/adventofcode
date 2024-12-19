@@ -11,6 +11,7 @@
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
+typedef uint64_t TRegister;
 enum OPCodes {
     ADV = '0', // DIV register A by 2 to the power of the combo operand, store in register A
     BXL, // XOR register B by the literal operand, store to register B
@@ -22,36 +23,33 @@ enum OPCodes {
     CDV  // DIV register A by 2 to the power of the combo operand, store in register C
 };
 
-enum Registers {
-    A = 0,
-    B,
-    C
-};
-
-inline uint64_t getComboOperandValue(const uint64_t* registers, const uint8_t& operand) {
+inline uint64_t getComboOperandValue(const TRegister& a, const TRegister& b, const TRegister& c, const uint8_t& operand) {
     switch(operand) {
     case '0' ... '3': return operand - '0';
-    case '4' ... '6': return registers[operand - '4'];
+    case '4': return a;
+    case '5': return b;
+    case '6': return c;
     default: return 0;
     }
 }
 
-void runProgram(uint64_t* registers, const char* program, const size_t& programLen, char* output) {
+void runProgram(TRegister a, const char* program, const size_t& programLen, char* output) {
+    TRegister b, c;
     const char* ptr = program;
 
     top:
     const uint8_t& operand = ptr[2];
 
     switch(*ptr) {
-    case ADV: registers[A] = registers[A] / quick_pow<2>(getComboOperandValue(registers, operand)); break;
-    case BDV: registers[B] = registers[A] / quick_pow<2>(getComboOperandValue(registers, operand)); break;
-    case CDV: registers[C] = registers[A] / quick_pow<2>(getComboOperandValue(registers, operand)); break;
-    case BXL: registers[B] ^= operand - '0'; break;
-    case BST: registers[B] = getComboOperandValue(registers, operand) & 0b111; break;
-    case BXC: registers[B] ^= registers[C]; break;
-    case OUT: *output++ = (getComboOperandValue(registers, operand) & 0b111) + '0'; *output++ = ','; break;
+    case ADV: a = a / quick_pow<2>(getComboOperandValue(a,b,c, operand)); break;
+    case BDV: b = a / quick_pow<2>(getComboOperandValue(a,b,c, operand)); break;
+    case CDV: c = a / quick_pow<2>(getComboOperandValue(a,b,c, operand)); break;
+    case BXC: b ^= c; break;
+    case BXL: b ^= operand - '0'; break;
+    case BST: b = getComboOperandValue(a,b,c, operand) & 0b111; break;
+    case OUT: *output++ = (getComboOperandValue(a,b,c, operand) & 0b111) + '0'; *output++ = ','; break;
     case JNZ:
-        if(registers[A]) {
+        if(a) {
             ptr = program + ((operand - '0') << 2);
             goto top;
         }
@@ -69,11 +67,11 @@ std::string aSolution = "";
 void Day::partA() {
     char output[256];
 
-    uint64_t registers[3] = { 0, 0, 0 };
+    TRegister a;
     int read;
 
-    sscanf(input.text.c_str(), "Register A: %lu\nRegister B: 0\nRegister C: 0\n\nProgram: %n", registers + A, &read);
-    runProgram(registers, input.text.c_str() + read, input.text.size() - read + 1, output);
+    sscanf(input.text.c_str(), "Register A: %lu\nRegister B: 0\nRegister C: 0\n\nProgram: %n", &a, &read);
+    runProgram(a, input.text.c_str() + read, input.text.size() - read + 1, output);
 
     aSolution = std::string(output);
 }
