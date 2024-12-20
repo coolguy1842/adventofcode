@@ -79,7 +79,7 @@ void Day::partA() {
     aSolution = std::string(output);
 }
 
-uint64_t bSolution;
+uint64_t bSolution = std::numeric_limits<uint64_t>::max();
 void Day::partB() {
     int read;
 
@@ -135,12 +135,9 @@ void Day::partB() {
         candidates = nextCandidates;
     }
 
-    uint64_t res = std::numeric_limits<uint64_t>::max();
     for(const uint64_t& candidate : candidates) {
-        res = std::min(candidate, res);
+        bSolution = std::min(candidate, bSolution);
     }
-
-    bSolution = res;
 }
 
 void Day::printResults(bool partA, bool partB) {
