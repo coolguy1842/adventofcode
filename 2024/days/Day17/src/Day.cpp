@@ -1,13 +1,16 @@
 #include "utils/MathUtils.hpp"
 #include <DayInput.hpp>
 #include <Day.hpp>
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <vector>
 
 Day::Day() : AOCUtil::IDay(dayInput) {}
 
@@ -78,7 +81,6 @@ void Day::partA() {
 
 uint64_t bSolution;
 void Day::partB() {
-    char output[256];
     int read;
 
     sscanf(input.text.c_str(), "Register A: %*lu\nRegister B: 0\nRegister C: 0\n\nProgram: %n", &read);
@@ -86,7 +88,59 @@ void Day::partB() {
     const char* program = input.text.c_str() + read;
     const uint64_t programLen = input.text.size() - read;
 
-    // do stuff here
+    std::vector<uint64_t> candidates = { 0 };
+    for(uint64_t digit = 0; digit <= programLen >> 1; digit++) {
+        const char& findDigit = program[(programLen - 1) - (digit << 1)];
+        std::vector<uint64_t> nextCandidates;
+
+        for(const uint64_t& candidate : candidates) {
+            uint64_t a = candidate << 3;
+
+            do {
+                TRegister aReg = a, b, c;
+                const char* ptr = program;
+
+                top:
+                const uint8_t& operand = ptr[2];
+
+                switch(*ptr) {
+                case ADV: aReg = aReg / quick_pow<2>(getComboOperandValue(aReg,b,c, operand)); break;
+                case BDV: b = aReg / quick_pow<2>(getComboOperandValue(aReg,b,c, operand)); break;
+                case CDV: c = aReg / quick_pow<2>(getComboOperandValue(aReg,b,c, operand)); break;
+                case BXC: b ^= c; break;
+                case BXL: b ^= operand - '0'; break;
+                case BST: b = getComboOperandValue(aReg,b,c, operand) & 0b111; break;
+                case OUT:
+                    if((getComboOperandValue(aReg,b,c, operand) & 0b111) + '0' == findDigit) {
+                        nextCandidates.push_back(a);
+                    }
+
+                    continue;
+                case JNZ:
+                    if(aReg) {
+                        ptr = program + ((operand - '0') << 2);
+                        goto top;
+                    }
+
+                    break;
+                case '\0': continue;
+                default: break;
+                }
+
+                ptr += 4;
+                goto top;
+            } while((++a & 0b111) != 0b111);
+        }
+
+        candidates = nextCandidates;
+    }
+
+    uint64_t res = std::numeric_limits<uint64_t>::max();
+    for(const uint64_t& candidate : candidates) {
+        res = std::min(candidate, res);
+    }
+
+    bSolution = res;
 }
 
 void Day::printResults(bool partA, bool partB) {
