@@ -1,11 +1,10 @@
 #include <DayInput.hpp>
 #include <Day.hpp>
-#include <algorithm>
+#include <cerrno>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <iterator>
 #include <limits>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -23,33 +22,10 @@ enum GridType {
 struct GridObject {
     GridType type;
     uint64_t minScore;
+
+    uint64_t startOffset;
+    uint64_t endOffset;
 };
-
-struct Node {
-    uint64_t score;
-    uint64_t position;
-
-    std::vector<uint64_t> path;
-
-    auto operator<=>(const Node& other) const { return score <=> other.score; }
-};
-
-void printPath(GridObject* grid, const uint64_t& width, const uint64_t& height, const uint64_t& highlight) {
-    for(uint64_t i = 0; i < width * height; i++) {
-        if(i % width == 0) {
-            printf("\n");
-        }
-
-        if(i == highlight) {
-            printf("*");
-            continue;
-        }
-
-        printf("%c", grid[i].type);
-    }
-
-    printf("\n");
-}
 
 std::vector<uint64_t> findPath(GridObject* grid, const uint64_t& width, const uint64_t& height, const uint64_t& start, const uint64_t& end) {
     const uint64_t directionsNum = 4;
@@ -97,55 +73,51 @@ GridObject* getGrid(const std::string& input, uint64_t& width, uint64_t& height,
     return grid;
 }
 
-uint64_t aSolution = 0;
-void Day::partA() {
-    uint64_t width, height, start, end;
-    GridObject* grid = getGrid(input.text, width, height, start, end);
-    
+uint64_t getManhattanDist(const int64_t& a, const int64_t& b, const int64_t& width) {
+    return std::abs((b % width) - (a % width)) + std::abs((b / width) - (a / width));
+}
+
+
+uint64_t partFunc(const char* text, const int64_t& minSaved, const int64_t& cheatDistance) {
+    uint64_t width, height, start, end, out = 0;
+    GridObject* grid = getGrid(text, width, height, start, end);
+
+    const uint64_t gridSize = width * height;
+
     const std::vector<uint64_t> mainPath = findPath(grid, width, height, start, end);
     const uint64_t directions[4] = { -width, 1, width, -1LU }, &pathSize = mainPath.size();
+   
+    uint64_t offset = 0;
+    for(const uint64_t& pos : mainPath) {
+        GridObject& obj = grid[pos];
 
-    for(auto it = mainPath.begin(); it != mainPath.end(); it++) {
-        const uint64_t score = std::distance(mainPath.begin(), it);
+        obj.endOffset = pathSize - offset;
+        obj.startOffset = offset++;
+    }
 
-        for(const uint64_t& direction : directions) {
-            const uint64_t pos = *it + (direction * 2);
-            if(grid[*it + direction].type != WALL) {
-                continue;
-            }
-            else if(pos >= width * height) {
-                continue;
-            }
+    for(const uint64_t& startPos : mainPath) {
+        const uint64_t& startScore = grid[startPos].startOffset;
 
-            const auto hackedIt = std::find(mainPath.begin(), mainPath.end(), pos);
-            if(hackedIt == mainPath.end()) {
-                continue;
-            }
-
-            const uint64_t totalScore = score + std::distance(hackedIt, mainPath.end()) + 2;
-            const uint64_t saved = pathSize - totalScore;
-
-            if(totalScore >= pathSize || saved < 100) {
+        for(const uint64_t& endPos : mainPath) {
+            const uint64_t distance = getManhattanDist(startPos, endPos, width);
+            if(distance > cheatDistance) {
                 continue;
             }
 
-            aSolution++;
+            if((int64_t)(pathSize - (startScore + grid[endPos].endOffset + distance)) >= minSaved) {
+                out++;
+            }
         }
     }
 
     free(grid);
+    return out;
 }
 
-uint64_t bSolution = 0;
-void Day::partB() {
-    uint64_t width, height, start, end;
-    GridObject* grid = getGrid(input.text, width, height, start, end);
-    
-    const std::vector<uint64_t> mainPath = findPath(grid, width, height, start, end);
-    const uint64_t directions[4] = { -width, 1, width, -1LU }, &pathSize = mainPath.size();
 
-    free(grid);
-}
+uint64_t aSolution = 0, bSolution = 0;
+void Day::partA() { aSolution = partFunc(input.text.c_str(), 100, 2); }
+void Day::partB() { bSolution = partFunc(input.text.c_str(), 100, 20); }
 
 void Day::printResults(bool partA, bool partB) {
     if(partA) spdlog::info("Part A: {}", aSolution);
