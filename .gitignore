@@ -1,15 +1,19 @@
+**/.direnv
+
 **/.vscode
 **/.cache
+**/session-cookie
 
 **/build
+**/compile_commands.json
 
 **/input.txt
 **/input/*.txt
 
 **/DayInput.hpp
-
-**/session-cookie
-
 **/perf.data*
+
+**/include/Input/*.hpp
+!**/include/Input/DayN.hpp
 
 !**/DayTemplate/include/DayInput.hpp
