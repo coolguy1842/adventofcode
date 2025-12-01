@@ -5,39 +5,30 @@
 #include <cstdio>
 #include <cstdlib>
 
-const int32_t dialMax = 100;
+constexpr int32_t dialMax = 100;
 void Day1::partA() {
     int32_t dial = 50;
+    StringUtil::split(input, "\n", [this, &dial](const std::string& line) {
+        dial += atoi(line.c_str() + 1) * (line[0] == 'L' ? -1 : 1);
 
-    for(std::string line : StringUtil::split(input, "\n")) {
-        int32_t moveBy;
-        sscanf(line.c_str(), "%*c%d", &moveBy);
-
-        dial += moveBy * (line[0] == 'L' ? -1 : 1);
-
-        printf("dial: %d\n", dial);
         if(dial % dialMax == 0) {
             aSolution++;
         }
-    }
+    });
 }
 
 void Day1::partB() {
     int32_t dial = 50;
+    StringUtil::split(input, "\n", [this, &dial](const std::string& line) {
+        int32_t dir    = line[0] == 'L' ? -1 : 1;
+        int32_t target = dial + (atoi(line.c_str() + 1) * dir);
 
-    for(std::string line : StringUtil::split(input, "\n")) {
-        int32_t moveBy;
-        sscanf(line.c_str(), "%*c%d", &moveBy);
-
-        int direction = line[0] == 'L' ? -1 : 1;
-        for(int32_t i = 0; i < moveBy; i++) {
-            dial += direction;
-
+        for(; dial != target; dial += dir) {
             if(dial % dialMax == 0) {
                 bSolution++;
             }
         }
-    }
+    });
 }
 
 void Day1::printSolutions(std::bitset<sizeof(IDay::SolutionFlags)> parts) {
