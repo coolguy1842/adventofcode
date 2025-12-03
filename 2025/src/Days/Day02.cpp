@@ -1,5 +1,6 @@
 #include <Days/Day02.hpp>
 #include <Input/Day02.hpp>
+#include <Util/MathUtil.hpp>
 #include <Util/StringUtil.hpp>
 #include <cmath>
 #include <cstdint>
@@ -11,12 +12,9 @@
 
 bool isValidA(uint64_t id) {
     std::string str = std::to_string(id);
-    // if odd then it cant be invalid
-    if(str.size() & 1) {
-        return true;
-    }
+    size_t halfSize = str.size() / 2;
 
-    return strncmp(str.c_str(), str.c_str() + (str.size() / 2), str.size() / 2) != 0;
+    return strncmp(str.c_str(), str.c_str() + halfSize, halfSize) != 0;
 }
 
 bool isValidB(uint64_t id) {
@@ -41,26 +39,42 @@ bool isValidB(uint64_t id) {
     return true;
 }
 
-uint64_t runPart(const std::function<bool(uint64_t)>& validFunc) {
-    uint64_t out = 0;
-    char* ptr    = const_cast<char*>(input.c_str()) - 1;
+void getRanges(const std::function<void(uint64_t, uint64_t)>& loopFunc) {
+    char* ptr = const_cast<char*>(input.c_str());
 
-    while(*++ptr) {
+    do {
         uint64_t start = std::strtoul(ptr, &ptr, 10);
         uint64_t end   = std::strtoul(ptr + 1, &ptr, 10);
 
-        for(uint64_t id = start; id <= end; id++) {
-            if(!validFunc(id)) {
-                out += id;
-            }
-        }
-    }
-
-    return out;
+        loopFunc(start, end);
+    } while(*ptr++);
 }
 
-void Day2::partA() { aSolution = runPart(isValidA); }
-void Day2::partB() { bSolution = runPart(isValidB); }
+void Day2::partA() {
+    getRanges([this](uint64_t start, uint64_t end) {
+        for(uint64_t id = start; id <= end; id++) {
+            // skip to nearest power of 10 if uneven length
+            uint8_t log = MathUtil::quickLog10(id);
+            if(log & 1) {
+                id = MathUtil::quickPow<10>(log);
+            }
+
+            if(!isValidA(id)) {
+                aSolution += id;
+            }
+        }
+    });
+}
+
+void Day2::partB() {
+    getRanges([this](uint64_t start, uint64_t end) {
+        for(uint64_t id = start; id <= end; id++) {
+            if(!isValidB(id)) {
+                bSolution += id;
+            }
+        }
+    });
+}
 
 void Day2::printSolutions(std::bitset<sizeof(IDay::SolutionFlags)> parts) {
     if(parts.test(A)) {

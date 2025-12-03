@@ -18,28 +18,38 @@ cpp_flags = []
 link_flags = []
 
 if get_option('buildtype') == 'debug'
-    c_flags = [ '-O0', '-ggdb3', '-Wno-c23-extensions)' ]
+    c_flags = [ '-O0', '-g3', '-ggdb3', '-Wno-c23-extensions)' ]
     link_flags = [ '-fsanitize=address', '-fno-omit-frame-pointer' ]
 elif get_option('buildtype') == 'release'
     c_flags = [ '-O3', '-ffast-math' ]
 endif
 
-executable(
-    'aoc',
+libaocutil = library(
+    'aocutil',
     sources: [
         'src/Util/Timer.cpp',
         'src/Util/StringUtil.cpp',
         'src/IDay.cpp',
+    ],
+    include_directories: include_directories('include'),
+    cpp_args: [ '-O3', '-g0', '-ffast-math' ],
+    native: true
+)
+
+aocutil_dep = declare_dependency(
+    link_with: libaocutil,
+    include_directories: include_directories('include')
+)
+
+executable(
+    'aoc',
+    sources: [
         'src/main.cpp',
         sources,
         days_hpp
     ],
-    include_directories: include_directories(
-        'include'
-    ),
-    dependencies: [
-        dependency('CLI11')
-    ],
+    include_directories: include_directories('include'),
+    dependencies: [ aocutil_dep, dependency('CLI11') ],
     cpp_args: cpp_flags,
     link_args: link_flags,
     native: true

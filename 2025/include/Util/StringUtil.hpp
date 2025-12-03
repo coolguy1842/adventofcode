@@ -3,12 +3,16 @@
 
 #include <functional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace StringUtil {
 
-std::vector<std::string> split(const std::string& str, const std::string& delim);
-void split(const std::string& str, const std::string& delim, std::function<void(const std::string&)> callback);
+void split(const std::string_view& str, const char& delim, std::function<void(const std::string&)> callback);
+void split(const std::string_view& str, const std::string_view& delim, std::function<void(const std::string&)> callback);
+
+std::vector<std::string> split(const std::string_view& str, const char& delim);
+std::vector<std::string> split(const std::string_view& str, const std::string_view& delim);
 
 }; // namespace StringUtil
 
