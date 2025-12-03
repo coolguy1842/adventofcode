@@ -1,55 +1,70 @@
 #include <Days/Day03.hpp>
 #include <Input/Day03.hpp>
 #include <Util/StringUtil.hpp>
+#include <cstdint>
 #include <cstring>
 #include <string>
 
 void Day3::partA() {
-    StringUtil::split(input, '\n', [this](const std::string& str) {
-        char left  = '0';
-        char right = '0';
+    char left  = '0';
+    char right = '0';
 
-        for(const char& c : str) {
-            if(right > left) {
-                left  = right;
-                right = c;
-            }
-            else if(c > right) {
-                right = c;
-            }
+    for(size_t i = 0; i <= input.size(); i++) {
+        const char& c = input[i];
+        if(c == '\n' || c == '\0') {
+            aSolution += ((left - '0') * 10) + (right - '0');
+
+            left  = '0';
+            right = '0';
+            continue;
         }
 
-        aSolution += ((left - '0') * 10) + (right - '0');
-    });
+        if(right > left) {
+            left  = right;
+            right = c;
+        }
+        else if(c > right) {
+            right = c;
+        }
+    }
 }
 
 void Day3::partB() {
-    StringUtil::split(input, '\n', [this](const std::string& str) {
-        char batteries[12];
-        memset(batteries, '0', sizeof(batteries));
+    constexpr int64_t numBatteries = 12;
 
-        for(size_t i = 0; i < str.size(); i++) {
+    const char *str = input.c_str(), *endPos = input.c_str() + input.size();
+    // all expected to be the same length
+    int64_t strLen = strchrnul(str, '\n') - str;
+
+    do {
+        char batteries[numBatteries];
+        int64_t batteriesSet = -1;
+
+        for(int64_t i = 0; i < strLen; i++) {
             const char& c = str[i];
 
-            size_t batteryMin = sizeof(batteries) - std::min(str.size() - i, sizeof(batteries));
-            for(size_t battery = batteryMin; battery < sizeof(batteries); battery++) {
+            int64_t batteryMin = numBatteries - std::min(strLen - i, numBatteries);
+            for(int64_t battery = batteryMin; battery < numBatteries; battery++) {
                 char& batteryValue = batteries[battery];
-                if(c > batteryValue) {
+                if(batteriesSet < battery || c > batteryValue) {
                     batteryValue = c;
-                    memset(batteries + battery + 1, '0', sizeof(batteries) - (battery + 1));
+                    batteriesSet = battery;
+
                     break;
                 }
             }
         }
 
         size_t out = 0;
-        for(size_t i = 0; i < sizeof(batteries); i++) {
+        for(size_t i = 0; i < numBatteries; i++) {
             out *= 10;
             out += batteries[i] - '0';
         }
 
         bSolution += out;
-    });
+
+        str += strLen + 1;
+    } while(str != endPos + 1);
 }
 
 void Day3::printSolutions(std::bitset<sizeof(IDay::SolutionFlags)> parts) {

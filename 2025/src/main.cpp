@@ -68,12 +68,12 @@ int main(int argc, char** argv) {
 
         if(parts.test(IDay::A)) {
             std::chrono::microseconds microseconds = std::chrono::duration_cast<std::chrono::microseconds>(day->partATimer().offset());
-            printf("Part A took %.02fms\n", microseconds.count() / 1000.0f);
+            printf("Part A took %.03fms\n", microseconds.count() / 1000.0f);
         }
 
         if(parts.test(IDay::B)) {
             std::chrono::microseconds microseconds = std::chrono::duration_cast<std::chrono::microseconds>(day->partBTimer().offset());
-            printf("Part B took %.02fms\n", microseconds.count() / 1000.0f);
+            printf("Part B took %.03fms\n", microseconds.count() / 1000.0f);
         }
     }
 
