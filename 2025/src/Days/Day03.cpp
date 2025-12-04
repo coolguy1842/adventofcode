@@ -1,9 +1,7 @@
 #include <Days/Day03.hpp>
 #include <Input/Day03.hpp>
 #include <Util/StringUtil.hpp>
-#include <cstdint>
 #include <cstring>
-#include <string>
 
 void Day3::partA() {
     char left = '0', right = '0';

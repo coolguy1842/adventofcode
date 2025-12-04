@@ -1,8 +1,5 @@
 #include <Util/StringUtil.hpp>
-#include <cstddef>
 #include <cstring>
-#include <string>
-#include <vector>
 
 void StringUtil::split(const std::string_view& str, const char& delim, std::function<void(const std::string&)> callback) {
     if(callback == nullptr) {

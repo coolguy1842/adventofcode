@@ -1,7 +1,5 @@
 #include <CLI/CLI.hpp>
 #include <Days.hpp>
-#include <chrono>
-#include <stdio.h>
 
 std::string dayValidator(const std::string& str) {
     const char* buf = str.c_str();

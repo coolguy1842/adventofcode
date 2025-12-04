@@ -1,8 +1,6 @@
 #include <Days/Day04.hpp>
 #include <Input/Day04.hpp>
 #include <Util/StringUtil.hpp>
-#include <cmath>
-#include <cstdint>
 #include <cstring>
 
 // true if box

@@ -2,13 +2,7 @@
 #include <Input/Day02.hpp>
 #include <Util/MathUtil.hpp>
 #include <Util/StringUtil.hpp>
-#include <cmath>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
-#include <functional>
-#include <string>
 
 bool isValidA(uint64_t id) {
     std::string str = std::to_string(id);

@@ -2,9 +2,7 @@
 #define __MATH_UTILS_HPP__
 
 // from 2024
-
 #include <cstdint>
-#include <cstdio>
 #include <type_traits>
 
 namespace MathUtil {
