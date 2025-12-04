@@ -6,8 +6,7 @@
 #include <string>
 
 void Day3::partA() {
-    char left  = '0';
-    char right = '0';
+    char left = '0', right = '0';
 
     for(size_t i = 0; i <= input.size(); i++) {
         const char& c = input[i];
@@ -31,16 +30,14 @@ void Day3::partA() {
 
 void Day3::partB() {
     constexpr int64_t numBatteries = 12;
+    char batteries[numBatteries];
 
     const char *str = input.c_str(), *endPos = input.c_str() + input.size();
     // all expected to be the same length
     int64_t strLen = strchrnul(str, '\n') - str;
 
     do {
-        char batteries[numBatteries];
-        int64_t batteriesSet = -1;
-
-        for(int64_t i = 0; i < strLen; i++) {
+        for(int64_t i = 0, batteriesSet = -1; i < strLen; i++) {
             const char& c = str[i];
 
             int64_t batteryMin = numBatteries - std::min(strLen - i, numBatteries);
