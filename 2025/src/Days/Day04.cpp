@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cstring>
 
-uint64_t removeRolls(char* grid, const int64_t width, const int64_t height) {
+uint64_t removeRolls(char* grid, const int64_t width, const int64_t height, bool first = true) {
     uint64_t out = 0;
 
     for(int64_t y = 0; y < height; y++) {
@@ -39,7 +39,9 @@ uint64_t removeRolls(char* grid, const int64_t width, const int64_t height) {
                 }
 
                 out++;
-                grid[i] = '.';
+                if(!first) {
+                    grid[i] = '.';
+                }
             skip:
                 break;
             }
@@ -68,7 +70,7 @@ void Day4::partB() {
 
     uint64_t moved = 0;
     do {
-        moved = removeRolls(grid, width, height);
+        moved = removeRolls(grid, width, height, false);
         bSolution += moved;
     } while(moved);
 
