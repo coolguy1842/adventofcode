@@ -5,74 +5,57 @@
 #include <cstdint>
 #include <cstring>
 
-uint64_t removeRolls(char* grid, const int64_t width, const int64_t height, bool first = true) {
-    uint64_t out = 0;
+// true if box
+inline bool checkNeighbour(const char* grid, const int64_t neighbourIdx, const int64_t width) {
+    return neighbourIdx >= 0 && grid[neighbourIdx] == '@';
+}
 
-    for(int64_t y = 0; y < height; y++) {
-        for(int64_t x = 0; x < width; x++) {
-            const int64_t i = (y * (width + 1)) + x;
-            switch(grid[i]) {
-            case '@': {
-                int64_t rolls = 0;
-                for(int64_t j = 0; j < 9; j++) {
-                    if(j == 4) {
-                        continue;
-                    }
+uint64_t checkBoxes(char* grid, size_t gridSize, int64_t width, bool shouldRemove) {
+    uint64_t out            = 0;
+    const int64_t offsets[] = {
+        -(width + 1), -width, (-width) + 1,
+        -1, 1,
+        width - 1, width, width + 1
+    };
 
-                    int64_t neighbourX = x + (j % 3) - 1;
-                    int64_t neighbourY = y + (j / 3) - 1;
-
-                    if(
-                        neighbourX < 0 || neighbourX >= width ||
-                        neighbourY < 0 || neighbourY >= height
-                    ) {
-                        continue;
-                    }
-
-                    if(grid[(neighbourY * (width + 1)) + neighbourX] == '@') {
-                        rolls++;
-                    }
-
-                    if(rolls >= 4) {
-                        goto skip;
-                    }
+    for(int64_t i = 0; i < input.size(); i++) {
+        if(grid[i] == '@') {
+            uint8_t rolls = 0;
+            for(const int64_t& off : offsets) {
+                if(checkNeighbour(grid, i + off, width) && ++rolls >= 4) {
+                    goto skip;
                 }
+            }
 
-                out++;
-                if(!first) {
-                    grid[i] = '.';
-                }
-            skip:
-                break;
+            if(shouldRemove) {
+                grid[i] = '.';
             }
-            default: break;
-            }
+
+            out++;
         }
+
+    skip:
     }
 
     return out;
 }
 
 void Day4::partA() {
-    char* grid           = strdup(input.c_str());
-    const int64_t width  = strchrnul(grid, '\n') - grid;
-    const int64_t height = input.size() / width;
+    const char* grid = input.c_str();
+    // newlines make a nice wrapper for neighbour checking
+    const int64_t width = (strchrnul(grid, '\n') - grid) + 1;
 
-    aSolution = removeRolls(grid, width, height);
-
-    free(grid);
+    aSolution = checkBoxes(const_cast<char*>(grid), input.size(), width, false);
 }
 
 void Day4::partB() {
-    char* grid           = strdup(input.c_str());
-    const int64_t width  = strchrnul(grid, '\n') - grid;
-    const int64_t height = input.size() / width;
+    char* grid          = strdup(input.c_str());
+    const int64_t width = (strchrnul(grid, '\n') - grid) + 1;
 
-    uint64_t moved = 0;
-    do {
-        moved = removeRolls(grid, width, height, false);
-        bSolution += moved;
-    } while(moved);
+    for(uint64_t prevSolution = !bSolution; prevSolution != bSolution;) {
+        prevSolution = bSolution;
+        bSolution += checkBoxes(grid, input.size(), width, true);
+    }
 
     free(grid);
 }
