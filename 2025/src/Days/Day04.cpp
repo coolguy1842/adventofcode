@@ -3,11 +3,6 @@
 #include <Util/StringUtil.hpp>
 #include <cstring>
 
-// true if box
-inline bool checkNeighbour(const char* grid, const int64_t neighbourIdx, const int64_t width) {
-    return neighbourIdx >= 0 && grid[neighbourIdx] == '@';
-}
-
 uint64_t checkBoxes(char* grid, size_t gridSize, int64_t width, bool shouldRemove) {
     uint64_t out            = 0;
     const int64_t offsets[] = {
@@ -16,19 +11,21 @@ uint64_t checkBoxes(char* grid, size_t gridSize, int64_t width, bool shouldRemov
         width - 1, width, width + 1
     };
 
-    for(int64_t i = 0; i < input.size(); i++) {
+    for(int64_t i = 0; i < gridSize; i++) {
         if(grid[i] == '@') {
             uint8_t rolls = 0;
             for(const int64_t& off : offsets) {
-                if(checkNeighbour(grid, i + off, width) && ++rolls >= 4) {
+                int64_t neighbourIdx = i + off;
+                if(
+                    neighbourIdx >= 0 && neighbourIdx < gridSize &&
+                    (grid[neighbourIdx] == '@' || (!shouldRemove && grid[neighbourIdx] == 'x')) &&
+                    ++rolls >= 4
+                ) {
                     goto skip;
                 }
             }
 
-            if(shouldRemove) {
-                grid[i] = '.';
-            }
-
+            grid[i] = 'x';
             out++;
         }
 
@@ -39,23 +36,21 @@ uint64_t checkBoxes(char* grid, size_t gridSize, int64_t width, bool shouldRemov
 }
 
 void Day4::partA() {
-    const char* grid = input.c_str();
+    std::string grid = input;
     // newlines make a nice wrapper for neighbour checking
-    const int64_t width = (strchrnul(grid, '\n') - grid) + 1;
+    const int64_t width = (strchrnul(grid.c_str(), '\n') - grid.c_str()) + 1;
 
-    aSolution = checkBoxes(const_cast<char*>(grid), input.size(), width, false);
+    aSolution = checkBoxes(grid.data(), input.size(), width, false);
 }
 
 void Day4::partB() {
-    char* grid          = strdup(input.c_str());
-    const int64_t width = (strchrnul(grid, '\n') - grid) + 1;
+    std::string grid    = input;
+    const int64_t width = (strchrnul(grid.c_str(), '\n') - grid.c_str()) + 1;
 
     for(uint64_t prevSolution = !bSolution; prevSolution != bSolution;) {
         prevSolution = bSolution;
-        bSolution += checkBoxes(grid, input.size(), width, true);
+        bSolution += checkBoxes(grid.data(), input.size(), width, true);
     }
-
-    free(grid);
 }
 
 void Day4::printSolutions(std::bitset<sizeof(IDay::SolutionFlags)> parts) {

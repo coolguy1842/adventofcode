@@ -1,7 +1,7 @@
 #include <Util/StringUtil.hpp>
 #include <cstring>
 
-void StringUtil::split(const std::string_view& str, const char& delim, std::function<void(const std::string&)> callback) {
+void StringUtil::split(const std::string_view& str, const char& delim, std::function<void(const std::string&)> callback, bool includeEmpty) {
     if(callback == nullptr) {
         return;
     }
@@ -11,7 +11,7 @@ void StringUtil::split(const std::string_view& str, const char& delim, std::func
         const char* next = strchrnul(cur, delim);
         size_t len       = next - cur;
 
-        if(len != 0) {
+        if(includeEmpty || len != 0) {
             callback(std::string(cur, len));
         }
 
@@ -19,7 +19,7 @@ void StringUtil::split(const std::string_view& str, const char& delim, std::func
     } while(*cur++);
 }
 
-void StringUtil::split(const std::string_view& str, const std::string_view& delim, std::function<void(const std::string&)> callback) {
+void StringUtil::split(const std::string_view& str, const std::string_view& delim, std::function<void(const std::string&)> callback, bool includeEmpty) {
     if(callback == nullptr) {
         return;
     }
@@ -29,7 +29,7 @@ void StringUtil::split(const std::string_view& str, const std::string_view& deli
         const char* next = strstr(cur, delim.data());
         size_t len       = next != NULL ? (next - cur) : strlen(cur);
 
-        if(len != 0) {
+        if(includeEmpty || len != 0) {
             callback(std::string(cur, len));
         }
 
@@ -37,14 +37,14 @@ void StringUtil::split(const std::string_view& str, const std::string_view& deli
     } while(cur++ != NULL);
 }
 
-std::vector<std::string> StringUtil::split(const std::string_view& str, const char& delim) {
+std::vector<std::string> StringUtil::split(const std::string_view& str, const char& delim, bool includeEmpty) {
     std::vector<std::string> out;
-    split(str, delim, [&out](const std::string& splitStr) { out.push_back(splitStr); });
+    split(str, delim, [&out](const std::string& splitStr) { out.push_back(splitStr); }, includeEmpty);
     return out;
 }
 
-std::vector<std::string> StringUtil::split(const std::string_view& str, const std::string_view& delim) {
+std::vector<std::string> StringUtil::split(const std::string_view& str, const std::string_view& delim, bool includeEmpty) {
     std::vector<std::string> out;
-    split(str, delim, [&out](const std::string& splitStr) { out.push_back(splitStr); });
+    split(str, delim, [&out](const std::string& splitStr) { out.push_back(splitStr); }, includeEmpty);
     return out;
 }
