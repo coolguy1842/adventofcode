@@ -1,98 +1,61 @@
 #include <Days/Day05.hpp>
 #include <Input/Day05.hpp>
 #include <Util/StringUtil.hpp>
-#include <algorithm>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <list>
 #include <vector>
 
 struct Range {
     uint64_t min;
     uint64_t max;
-
-    bool operator<(const Range& b) const {
-        return min < b.min;
-    }
 };
 
 void Day5::partA() {
-    std::list<Range> ranges;
-    bool readingRanges = true;
+    std::vector<Range> ranges;
+    for(char* str = const_cast<char*>(input.c_str()); *str != '\0';) {
+        const uint64_t val = strtoul(str, &str, 10);
+        if(*str == '-') {
+            const uint64_t max = strtoul(str + 1, &str, 10);
+            ranges.push_back({ val, max });
+            continue;
+        }
 
-    StringUtil::split(
-        input,
-        '\n',
-        [&](const std::string& str) {
-            if(str.empty()) {
-                readingRanges = false;
-                return;
+        for(const Range& range : ranges) {
+            if(val >= range.min && val <= range.max) {
+                aSolution++;
+                break;
             }
-
-            if(readingRanges) {
-                uint64_t min, max;
-                sscanf(str.c_str(), "%lu-%lu", &min, &max);
-
-                ranges.push_back({ min, max });
-                return;
-            }
-
-            uint64_t id = strtol(str.c_str(), nullptr, 10);
-            for(const Range& range : ranges) {
-                if(id >= range.min && id <= range.max) {
-                    aSolution++;
-                    return;
-                }
-            }
-        },
-        true
-    );
+        }
+    }
 }
 
 void Day5::partB() {
     std::vector<Range> ranges;
-
-    for(const std::string& str : StringUtil::split(input, '\n', true)) {
-        if(str.empty()) {
-            break;
-        }
-
-        uint64_t min, max;
-        sscanf(str.c_str(), "%lu-%lu", &min, &max);
-
+    // assume input is valid
+    for(char* str = const_cast<char*>(input.c_str()); str[1] != '\n';) {
+        const uint64_t min = strtoul(str, &str, 10);
+        const uint64_t max = strtoul(str + 1, &str, 10);
         ranges.push_back({ min, max });
     }
 
-    std::sort(ranges.begin(), ranges.end());
-    for(auto it = ranges.begin(); it != ranges.end();) {
+    std::sort(ranges.begin(), ranges.end(), [](const Range& a, const Range& b) { return a.min < b.min; });
+    for(auto it = ranges.begin(); it != ranges.end(); it++) {
         Range& a = *it;
+
         for(auto it2 = it + 1; it2 != ranges.end();) {
-            Range& b = *it2;
+            const Range& b = *it2;
 
-            if(a.min >= b.min && a.max <= b.max) {
-                it = ranges.erase(it);
-                goto skip;
-            }
-
+            // if a is inside b, remove b and merge min/maxes
             if(a.min <= b.min && a.max >= b.min) {
-                if(a.max >= b.max) {
-                    it2 = ranges.erase(it2);
+                a.min = std::min(a.min, b.min);
+                a.max = std::max(a.max, b.max);
 
-                    continue;
-                }
-
-                b.min = a.min;
-
-                it = ranges.erase(it);
-                goto skip;
+                it2 = ranges.erase(it2);
+                continue;
             }
+
             it2++;
         }
 
         bSolution += (a.max - a.min) + 1;
-        it++;
-    skip:
     }
 }
 
