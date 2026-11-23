@@ -1,7 +1,7 @@
 {
     description = "Advent of code solutions";
     inputs = {
-        nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+        nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     };
 
     outputs = { nixpkgs, systems, ... } @ inputs: let
@@ -11,12 +11,21 @@
             pkgs = nixpkgs.legacyPackages.${system};
         in {
             default = pkgs.mkShell {
-                packages = with pkgs; [ pkgs.linuxPackages_latest.perf aocd ];
-                hardeningDisable = [ "all" ];
+                packages = with pkgs; [
+                    pkgs.linuxPackages_latest.perf
+                    advent-of-code-data
+                ];
 
+                hardeningDisable = [ "all" ];
                 nativeBuildInputs = with pkgs; [
-                    clang
-                    pkgconf
+                    clang-tools
+
+                    llvmPackages_latest.lldb
+                    llvmPackages_latest.libllvm
+                    llvmPackages_latest.libcxx
+                    llvmPackages_latest.clang
+
+                    pkg-config
                     ninja
                     cmake
                     meson

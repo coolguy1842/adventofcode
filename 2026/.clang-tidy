@@ -1,0 +1,53 @@
+---
+HeaderFileExtensions:
+  - ''
+  - h
+  - hpp
+
+ImplementationFileExtensions:
+  - c
+  - cpp
+
+HeaderFilterRegex: ''
+ExcludeHeaderFilterRegex: ''
+FormatStyle:     none
+SystemHeaders:   false
+WarningsAsErrors: true
+
+# -cppcoreguidelines-pro-type-vararg is just for this project as i use SDL_Log
+# -misc-non-private-member-variables-in-classes is because cppcoreguidlines implements the same check
+# -hicpp-avoid-goto and -hicpp-special-member-functions is because cppcoreguidelines implements the same check
+Checks: >
+    cppcoreguidelines-*,
+    bugprone-*,
+    misc-*,
+    modernize-*,
+    performance-*,
+    clang-analyzer-*,
+    readability-*,
+    portability-*,
+    hicpp-*,
+
+    -cppcoreguidelines-pro-type-vararg,
+    -hicpp-vararg,
+
+    -*-magic-numbers,
+    -*-non-private-member-variables-in-classes,
+    -*-uppercase-literal-suffix,
+
+    -cppcoreguidelines-pro-type-reinterpret-cast,
+    -readability-magic-numbers,
+    -modernize-use-trailing-return-type,
+    -readability-redundant-access-specifiers,
+    -readability-identifier-length,
+    -misc-include-cleaner,
+    -readability-function-cognitive-complexity,
+    -readability-avoid-nested-conditional-operator,
+    -hicpp-special-member-functions,
+    -hicpp-signed-bitwise,
+    -hicpp-avoid-goto,
+    -bugprone-easily-swappable-parameters
+
+CheckOptions:
+  cppcoreguidelines-avoid-non-const-global-variables.AllowInternalLinkage: true
+  cppcoreguidelines-special-member-functions.AllowMissingMoveFunctionsWhenCopyIsDeleted: true
